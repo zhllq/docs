@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Agent Basics</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, serif;
+    background: #fff;
+    color: #111;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 48px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+  }
+
+  .subtitle {
+    color: #555;
+    font-size: 13px;
+    margin-bottom: 36px;
+  }
+
+  h2 {
+    font-size: 15px;
+    font-weight: bold;
+    margin: 36px 0 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #222;
+  }
+
+  .filename {
+    font-family: monospace;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 10px;
+  }
+
+  pre {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-left: 4px solid #aaa;
+    padding: 18px 20px;
+    font-family: Fixedsys, Consolas, "Courier New", monospace;
+    font-size: 13.5px;
+    line-height: 1.75;
+    overflow-x: auto;
+    white-space: pre;
+    margin-bottom: 16px;
+    color: #000000;
+  }
+
+  /* Visual Assist X — Visual Studio light theme colors */
+  .kw  { color: #0000ff; }   /* keywords   — blue     */
+  .st  { color: #a31515; }   /* strings    — dark red */
+  .cm  { color: #008000; }   /* comments   — green    */
+  .fn  { color: #8b2500; font-weight: bold; font-size: 1.1em; }   /* functions  — dark red-brown */
+  .nb  { color: #2b91af; }   /* builtins   — teal     */
+  .vr  { color: #888888; }   /* variables  — gray        */
+  .mv  { color: #6a0dad; font-weight: bold; }  /* messages var — purple bold */
+  .hl  { background: #fff8c5; display: inline-block; width: 100%; font-weight: bold; color: #000; }  /* highlighted lines */
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 20px;
+    font-size: 13px;
+  }
+
+  th {
+    background: #eee;
+    text-align: left;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    font-weight: bold;
+  }
+
+  td {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    vertical-align: top;
+  }
+
+  td code, th code {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 12px;
+    background: #ececec;
+    padding: 1px 4px;
+    border-radius: 2px;
+  }
+
+  .concept-tag {
+    display: inline-block;
+    background: #222;
+    color: #fff;
+    font-size: 11px;
+    font-family: monospace;
+    padding: 2px 7px;
+    margin-right: 6px;
+    margin-bottom: 4px;
+  }
+
+  .diagram {
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    padding: 14px 20px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 12.5px;
+    line-height: 1.8;
+    margin: 12px 0 20px;
+  }
+
+  .section-rule {
+    border: none;
+    border-top: 2px solid #aaa;
+    margin: 40px 0 0;
+  }
+
+  .install {
+    background: #f5f5f5;
+    border: 1px solid #ccc;
+    padding: 8px 14px;
+    font-family: monospace;
+    font-size: 12px;
+    margin: 8px 0 16px;
+  }
+
+  @media print {
+    body { padding: 20px 32px; }
+
+    /* never split inside these */
+    pre,
+    table,
+    svg,
+    .install,
+    .diagram {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    /* SVG wrapper divs (the UML diagram container) */
+    div:has(svg) {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    /* equation row + UML diagram — keep the whole mental model together if possible */
+    h2 {
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    /* keep a step label (p) glued to its following code block (pre) */
+    p + pre {
+      page-break-before: avoid;
+      break-before: avoid;
+    }
+
+    /* keep concept-tag line with the install line and code block below it */
+    p:has(.concept-tag) {
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    /* keep section header with the content right after */
+    hr.section-rule + h2 {
+      page-break-before: avoid;
+      break-before: avoid;
+    }
+
+    /* keep highlighted lines inside pre from orphaning */
+    .hl {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>AI Agent Basics</h1>
+<p class="subtitle">Three core concepts: LLM Calling · Tool Calling · Loop Iteration</p>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     MENTAL MODEL
+     ══════════════════════════════════════════════════════════════════════════ -->
+<h2>Mental Model</h2>
+
+<!-- equation row -->
+<div style="display:flex; align-items:center; gap:12px; margin:14px 0 20px; flex-wrap:wrap;">
+  <div style="background:#e8f0fe; border:2px solid #4a6cf7; border-radius:6px; padding:8px 18px; font-weight:bold; font-size:15px; font-family:Fixedsys,Consolas,monospace;">Agent</div>
+  <div style="font-size:18px; font-weight:bold; color:#555;">=</div>
+  <div style="background:#fce8e8; border:2px solid #c0392b; border-radius:6px; padding:8px 18px; font-weight:bold; font-family:Fixedsys,Consolas,monospace;">LLM</div>
+  <div style="font-size:18px; font-weight:bold; color:#555;">+</div>
+  <div style="background:#e8f8e8; border:2px solid #27ae60; border-radius:6px; padding:8px 18px; font-weight:bold; font-family:Fixedsys,Consolas,monospace;">Tools</div>
+  <div style="font-size:18px; font-weight:bold; color:#555;">+</div>
+  <div style="background:#fef8e8; border:2px solid #f39c12; border-radius:6px; padding:8px 18px; font-weight:bold; font-family:Fixedsys,Consolas,monospace;">Loop</div>
+</div>
+
+<!-- UML Activity Diagram -->
+<div style="border:1px solid #ccc; border-radius:6px; background:#fafaf8; padding:20px 24px; margin-bottom:14px;">
+  <div style="font-weight:bold; font-size:12px; color:#888; letter-spacing:0.5px; margin-bottom:14px; text-transform:uppercase;">Agentic Loop — UML Activity Diagram</div>
+
+  <svg width="510" height="335" xmlns="http://www.w3.org/2000/svg"
+       font-family="Fixedsys,Consolas,monospace" font-size="12.5">
+    <defs>
+      <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#444"/>
+      </marker>
+    </defs>
+
+    <!-- ① Initial node (filled circle) -->
+    <circle cx="210" cy="22" r="11" fill="#222"/>
+
+    <!-- ↓ -->
+    <line x1="210" y1="33" x2="210" y2="51" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- ② call LLM (activity) -->
+    <rect x="140" y="51" width="140" height="38" rx="8" fill="#fce8e8" stroke="#c0392b" stroke-width="2"/>
+    <text x="210" y="75" text-anchor="middle" font-weight="bold" fill="#222">call LLM</text>
+
+    <!-- ↓ -->
+    <line x1="210" y1="89" x2="210" y2="113" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- ③ Decision diamond: stop_reason == end_turn? -->
+    <polygon points="210,113 305,148 210,183 115,148" fill="#fef8e8" stroke="#f39c12" stroke-width="2"/>
+    <text x="210" y="144" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">stop_reason</text>
+    <text x="210" y="159" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">== end_turn?</text>
+
+    <!-- YES → right -->
+    <line x1="305" y1="148" x2="368" y2="148" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+    <text x="334" y="141" text-anchor="middle" font-size="11" font-weight="bold" fill="#27ae60">YES</text>
+
+    <!-- ④ done (activity) -->
+    <rect x="368" y="129" width="110" height="38" rx="8" fill="#e8f8e8" stroke="#27ae60" stroke-width="2"/>
+    <text x="423" y="153" text-anchor="middle" font-weight="bold" fill="#222">✓ done</text>
+
+    <!-- done → end node -->
+    <line x1="423" y1="167" x2="423" y2="189" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- ⑤ Final node (bullseye) -->
+    <circle cx="423" cy="202" r="14" fill="none" stroke="#222" stroke-width="2"/>
+    <circle cx="423" cy="202" r="9"  fill="#222"/>
+
+    <!-- NO ↓ -->
+    <line x1="210" y1="183" x2="210" y2="207" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+    <text x="222" y="200" font-size="11" font-weight="bold" fill="#c0392b">NO [tool_use]</text>
+
+    <!-- ⑥ execute tool (activity) -->
+    <rect x="140" y="207" width="140" height="38" rx="8" fill="#e8f8e8" stroke="#27ae60" stroke-width="2"/>
+    <text x="210" y="231" text-anchor="middle" font-weight="bold" fill="#222">execute tool</text>
+
+    <!-- ↓ -->
+    <line x1="210" y1="245" x2="210" y2="264" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- ⑦ feed result back (activity) -->
+    <rect x="120" y="264" width="180" height="38" rx="8" fill="#e8f0fe" stroke="#4a6cf7" stroke-width="2"/>
+    <text x="210" y="288" text-anchor="middle" font-weight="bold" fill="#222">feed result back</text>
+
+    <!-- Loop back: left edge of feed result back → left → up → left edge of call LLM -->
+    <path d="M120,283 L72,283 L72,70 L140,70"
+          fill="none" stroke="#888" stroke-width="1.5" stroke-dasharray="6,3"
+          marker-end="url(#arr)"/>
+    <text x="58" y="183" text-anchor="middle" font-size="10" fill="#888"
+          transform="rotate(-90,58,183)">loop back</text>
+
+  </svg>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     FILE 1: manual_agent.py
+     ══════════════════════════════════════════════════════════════════════════ -->
+<hr class="section-rule">
+<h2>File 1 — manual_agent.py</h2>
+<p class="filename">agent_basics/manual_agent.py</p>
+
+<p style="margin-bottom:10px;">
+  <span class="concept-tag">1 LLM Calling</span>
+  <span class="concept-tag">2 Tool Calling</span>
+  <span class="concept-tag">3 Loop Iteration</span>
+</p>
+
+<p style="margin-bottom:12px; color:#333;">
+Install: <code style="font-family:monospace; background:#ececec; padding:1px 5px;">pip install anthropic</code>
+&nbsp;·&nbsp; Set env var <code style="font-family:monospace; background:#ececec; padding:1px 5px;">ANTHROPIC_API_KEY</code>
+</p>
+
+<pre><span class="cm">"""
+Minimal AI Agent — demonstrates 3 of 4 core concepts:
+  1. LLM Calling      — client.messages.create()
+  2. Tool Calling     — define tools, handle tool_use blocks
+  3. Loop Iteration   — agentic loop: keep calling until end_turn
+"""</span>
+
+<span class="kw">import</span> json
+<span class="kw">import</span> anthropic
+
+<span class="cm"># ── 1. LLM CALLING ────────────────────────────────────────────────────────────</span>
+<span class="hl"><span class="vr">client</span> = anthropic.Anthropic()  <span class="cm"># reads ANTHROPIC_API_KEY from env</span></span>
+
+<span class="cm"># ── 2. TOOL DEFINITION ────────────────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">get_weather</span>(<span class="vr">location</span>: str) -> str:
+    <span class="st">"""Fake weather tool — replace with a real API call."""</span>
+    <span class="kw">return</span> <span class="st">f"72°F and sunny in {<span class="vr">location</span>}"</span>
+
+<span class="vr">TOOLS</span> = [
+    {
+        <span class="st">"name"</span>: <span class="st">"get_weather"</span>,
+        <span class="st">"description"</span>: <span class="st">"Get the current weather for a city."</span>,
+        <span class="st">"input_schema"</span>: {
+            <span class="st">"type"</span>: <span class="st">"object"</span>,
+            <span class="st">"properties"</span>: {
+                <span class="st">"location"</span>: {<span class="st">"type"</span>: <span class="st">"string"</span>, <span class="st">"description"</span>: <span class="st">"City name"</span>}
+            },
+            <span class="st">"required"</span>: [<span class="st">"location"</span>],
+        },
+    }
+]
+
+<span class="vr">TOOL_REGISTRY</span> = {<span class="st">"get_weather"</span>: get_weather}
+
+
+
+
+
+<span class="cm"># ── 3. LOOP ITERATION (agentic loop) ────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">run_agent</span>(<span class="vr">user_prompt</span>: str) -> str:
+    <span class="mv">messages</span> = [{<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="vr">user_prompt</span>}]
+
+    <span class="kw">while</span> <span class="nb">True</span>:
+        <span class="cm"># --- LLM call ---</span>
+<span class="hl">        <span class="vr">response</span> = <span class="vr">client</span>.messages.create(
+            model=<span class="st">"claude-opus-4-6"</span>,
+            max_tokens=<span class="nb">1024</span>,
+            tools=<span class="vr">TOOLS</span>,
+            messages=<span class="mv">messages</span>,
+        )</span>
+
+        <span class="cm"># Loop exit: Claude is done</span>
+        <span class="kw">if</span> <span class="vr">response</span>.stop_reason == <span class="st">"end_turn"</span>:
+            <span class="kw">return</span> <span class="nb">next</span>(<span class="vr">b</span>.text <span class="kw">for</span> <span class="vr">b</span> <span class="kw">in</span> <span class="vr">response</span>.content <span class="kw">if</span> <span class="vr">b</span>.type == <span class="st">"text"</span>)
+
+        <span class="cm"># --- Tool call handling ---</span>
+        <span class="cm"># Append Claude's response (may contain tool_use blocks)</span>
+        <span class="mv">messages</span>.append({<span class="st">"role"</span>: <span class="st">"assistant"</span>, <span class="st">"content"</span>: <span class="vr">response</span>.content})
+
+        <span class="cm"># Execute every tool Claude requested, collect results</span>
+        <span class="vr">tool_results</span> = []
+        <span class="kw">for</span> <span class="vr">block</span> <span class="kw">in</span> <span class="vr">response</span>.content:
+            <span class="kw">if</span> <span class="vr">block</span>.type == <span class="st">"tool_use"</span>:
+                <span class="vr">fn</span> = <span class="vr">TOOL_REGISTRY</span>[<span class="vr">block</span>.name]
+                <span class="vr">result</span> = <span class="vr">fn</span>(**<span class="vr">block</span>.input)          <span class="cm"># call the local function</span>
+                <span class="nb">print</span>(<span class="st">f"  [tool] {<span class="vr">block</span>.name}({<span class="vr">block</span>.input}) → {<span class="vr">result</span>}"</span>)
+                <span class="vr">tool_results</span>.append({
+                    <span class="st">"type"</span>: <span class="st">"tool_result"</span>,
+                    <span class="st">"tool_use_id"</span>: <span class="vr">block</span>.id,        <span class="cm"># must match the request id</span>
+                    <span class="st">"content"</span>: <span class="vr">result</span>,
+                })
+
+        <span class="cm"># Feed results back so the loop continues</span>
+        <span class="mv">messages</span>.append({<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="vr">tool_results</span>})
+
+
+<span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
+    <span class="vr">answer</span> = <span class="fn">run_agent</span>(<span class="st">"What's the weather like in Paris and Tokyo?"</span>)
+    <span class="nb">print</span>(<span class="st">"\nFinal answer:"</span>, <span class="vr">answer</span>)</pre>
+
+<table>
+  <tr><th>Concept</th><th>Where in file</th></tr>
+  <tr><td><strong>LLM Calling</strong></td><td><code>client.messages.create(...)</code> — one API call to Claude</td></tr>
+  <tr><td><strong>Tool Calling</strong></td><td><code>TOOLS</code> list defines the schema; <code>block.type == "tool_use"</code> handles Claude's request</td></tr>
+  <tr><td><strong>Loop Iteration</strong></td><td><code>while True:</code> — keeps calling until <code>stop_reason == "end_turn"</code></td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     MESSAGES WALKTHROUGH
+     ══════════════════════════════════════════════════════════════════════════ -->
+<hr class="section-rule">
+<h2>What <code style="font-size:13px;">messages</code> looks like — step by step</h2>
+<p style="margin: 6px 0 16px; color:#333; font-size:13px;">
+  The loop appends to <code>messages</code> every turn. Here is what the array contains after each step for the prompt <em>"What's the weather in Paris?"</em>
+</p>
+
+<p style="margin: 0 0 4px; font-weight:bold; font-size:13px;">① Start — user sends the question</p>
+<pre><span class="mv">messages</span> = [
+    {
+        <span class="st">"role"</span>: <span class="st">"user"</span>,
+        <span class="st">"content"</span>: <span class="st">"What's the weather in Paris?"</span>
+    }
+]</pre>
+
+<p style="margin: 0 0 4px; font-weight:bold; font-size:13px;">② Claude replies — requests a tool call (<code>stop_reason = "tool_use"</code>)</p>
+<pre><span class="mv">messages</span> = [
+    {
+        <span class="st">"role"</span>: <span class="st">"user"</span>,
+        <span class="st">"content"</span>: <span class="st">"What's the weather in Paris?"</span>
+    },
+    {
+        <span class="st">"role"</span>: <span class="st">"assistant"</span>,
+        <span class="st">"content"</span>: [
+            {
+                <span class="st">"type"</span>: <span class="st">"text"</span>,
+                <span class="st">"text"</span>: <span class="st">"Let me check the weather for you."</span>
+            },
+<span class="hl">            {
+                <span class="st">"type"</span>: <span class="st">"tool_use"</span>,
+                <span class="st">"id"</span>:   <span class="st">"toolu_01XYZ"</span>,          <span class="cm"># unique id for this call</span>
+                <span class="st">"name"</span>: <span class="st">"get_weather"</span>,
+                <span class="st">"input"</span>: { <span class="st">"location"</span>: <span class="st">"Paris"</span> }
+            }</span>
+        ]
+    }
+]
+
+<span class="cm"># ── Uncertainty → Certainty ───────────────────────────────────────────────────
+# The tool definition declares exact input parameters and their types.
+# Claude reads that schema and must reply with a concrete value for every
+# required field — no ambiguity allowed. The Agent then strictly validates
+# each value: range checks, syntax &amp; semantic checks, and optionally a
+# second LLM call to verify correctness before the tool is executed.
+#
+# 这是 LLM 从「不确定」走向「确定」的关键时刻。工具定义声明了每个输入参数及其
+# 类型；Claude 读取该 schema 后，必须为每个必填字段给出具体值，不允许模糊回答。
+# Agent 随后对每个参数严格验证：值域检查、语法与语义检查，以及可选的第二次
+# LLM 调用来确认参数正确性，再执行工具。
+# ─────────────────────────────────────────────────────────────────────────────</span></pre>
+
+<p style="margin: 0 0 4px; font-weight:bold; font-size:13px;">③ Your code runs the tool — appends the result as a user message</p>
+<pre><span class="mv">messages</span> = [
+    <span class="cm">... (same as above) ...</span>
+    {
+        <span class="st">"role"</span>: <span class="st">"user"</span>,
+        <span class="st">"content"</span>: [
+            {
+                <span class="st">"type"</span>:        <span class="st">"tool_result"</span>,
+                <span class="st">"tool_use_id"</span>: <span class="st">"toolu_01XYZ"</span>,   <span class="cm"># must match ② id</span>
+                <span class="st">"content"</span>:     <span class="st">"72°F and sunny in Paris"</span>
+            }
+        ]
+    }
+]</pre>
+
+<p style="margin: 0 0 4px; font-weight:bold; font-size:13px;">④ Claude reads the result — replies with final answer (<code>stop_reason = "end_turn"</code>)</p>
+<pre><span class="mv">messages</span> = [
+    <span class="cm">... (same as above) ...</span>
+    {
+        <span class="st">"role"</span>: <span class="st">"assistant"</span>,
+        <span class="st">"content"</span>: [
+            {
+                <span class="st">"type"</span>: <span class="st">"text"</span>,
+                <span class="st">"text"</span>: <span class="st">"The weather in Paris is 72°F and sunny."</span>
+            }
+        ]
+    }
+]
+<span class="cm"># stop_reason == "end_turn"  →  loop exits, return the text above</span></pre>
+
+<table>
+  <tr><th>Step</th><th>Who appends</th><th>role</th><th>content type</th></tr>
+  <tr><td>①</td><td>Your code</td><td><code>"user"</code></td><td>plain string</td></tr>
+  <tr><td>②</td><td>SDK (response.content)</td><td><code>"assistant"</code></td><td><code>text</code> + <code>tool_use</code> blocks</td></tr>
+  <tr><td>③</td><td>Your code</td><td><code>"user"</code></td><td><code>tool_result</code> block — id must match ②</td></tr>
+  <tr><td>④</td><td>SDK (response.content)</td><td><code>"assistant"</code></td><td><code>text</code> block — final answer</td></tr>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SUMMARY
+     ══════════════════════════════════════════════════════════════════════════ -->
+<hr class="section-rule">
+<h2>Three Concepts at a Glance</h2>
+
+<table>
+  <tr>
+    <th>#</th>
+    <th>Concept</th>
+    <th>Key code</th>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td><strong>LLM Calling</strong></td>
+    <td><code>client.messages.create(model=..., messages=...)</code></td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td><strong>Tool Calling</strong></td>
+    <td>Define <code>TOOLS</code> schema · handle <code>block.type == "tool_use"</code> · return <code>tool_result</code></td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td><strong>Loop Iteration</strong></td>
+    <td><code>while True: ... if stop_reason == "end_turn": break</code></td>
+  </tr>
+</table>
+
+</body>
+</html>
