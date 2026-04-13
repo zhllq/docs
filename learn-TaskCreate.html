@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Side-by-Side Diff: translate SKILL.md</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: #f0f2f5;
+    color: #1a1a1a;
+  }
+  .header {
+    background: #24292f;
+    color: #fff;
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header h1 { font-size: 1.2rem; font-weight: 600; }
+  .header .badge {
+    font-size: 0.8rem;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+  }
+  .badge.added { background: #238636; color: #fff; }
+  .badge.removed { background: #da3633; color: #fff; }
+  .badge.unchanged { background: #57606a; color: #fff; }
+  .legend-bar {
+    background: #fff;
+    border-bottom: 1px solid #d0d7de;
+    padding: 0.5rem 2rem;
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.85rem;
+    color: #57606a;
+  }
+  .legend-bar span { display: flex; align-items: center; gap: 0.3rem; }
+  .legend-dot {
+    width: 12px; height: 12px; border-radius: 2px; display: inline-block;
+  }
+  .legend-dot.green { background: #dafbe1; border: 1px solid #1a7f37; }
+  .legend-dot.red { background: #ffebe9; border: 1px solid #cf222e; }
+  .legend-dot.white { background: #fff; border: 1px solid #d0d7de; }
+
+  .diff-container {
+    display: flex;
+    width: 100%;
+    overflow-x: auto;
+  }
+  .diff-side {
+    flex: 1;
+    min-width: 0;
+    border-right: 2px solid #8b949e;
+  }
+  .diff-side:last-child { border-right: none; }
+  .side-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 10px 16px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #d0d7de;
+  }
+  .side-header.original { background: #ffebe9; color: #82071e; }
+  .side-header.updated { background: #dafbe1; color: #116329; }
+
+  .line {
+    display: flex;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .line-num {
+    min-width: 42px;
+    padding: 1px 8px 1px 8px;
+    text-align: right;
+    color: #8b949e;
+    background: #f6f8fa;
+    user-select: none;
+    flex-shrink: 0;
+    border-right: 1px solid #e5e7eb;
+  }
+  .line-content {
+    padding: 1px 12px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    flex: 1;
+    min-width: 0;
+  }
+  .line.added .line-num { background: #ccffd8; }
+  .line.added .line-content { background: #dafbe1; }
+  .line.removed .line-num { background: #ffd7d5; }
+  .line.removed .line-content { background: #ffebe9; }
+  .line.empty .line-num { background: #f6f8fa; color: transparent; }
+  .line.empty .line-content { background: #f6f8fa; }
+  .line.highlight .line-content { font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>translate/SKILL.md &mdash; Side-by-Side Diff</h1>
+  <div>
+    <span class="badge added">+12 added</span>
+    <span class="badge removed">-1 removed</span>
+    <span class="badge unchanged">134 unchanged</span>
+  </div>
+</div>
+
+<div class="legend-bar">
+  <span><span class="legend-dot green"></span> Added</span>
+  <span><span class="legend-dot red"></span> Removed</span>
+  <span><span class="legend-dot white"></span> Unchanged</span>
+</div>
+
+<div class="diff-container">
+<!-- LEFT: ORIGINAL -->
+<div class="diff-side">
+<div class="side-header original">Original (before)</div>
+<div class="line"><div class="line-num">1</div><div class="line-content">---</div></div>
+<div class="line"><div class="line-num">2</div><div class="line-content">name: translate</div></div>
+<div class="line"><div class="line-num">3</div><div class="line-content">description: Translate a tech blog, tech doc, or a piece of text into Chinese with a concise, sharp style and output a styled HTML file. Use this skill whenever the user wants to translate a tech article, blog post, documentation, or text into Chinese, or says "translate this", "翻译", "/translate &lt;url&gt;", or wants to convert English tech content into readable Chinese. Also trigger when the user provides a URL or text and asks for a Chinese translation. This skill is specifically for tech content translation — not for book chapters (use translate-book for PDFs).</div></div>
+<div class="line"><div class="line-num">4</div><div class="line-content">---</div></div>
+<div class="line"><div class="line-num">5</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">6</div><div class="line-content"># Translate: Tech Content → Chinese HTML</div></div>
+<div class="line"><div class="line-num">7</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">8</div><div class="line-content">Translate English tech blogs, docs, or text into Chinese. Output a single styled HTML file.</div></div>
+<div class="line"><div class="line-num">9</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">10</div><div class="line-content">## Arguments</div></div>
+<div class="line"><div class="line-num">11</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">12</div><div class="line-content">The user provides either:</div></div>
+<div class="line"><div class="line-num">13</div><div class="line-content">- A **URL** to a tech blog or doc (e.g., `/translate https://example.com/article`)</div></div>
+<div class="line"><div class="line-num">14</div><div class="line-content">- A **block of text** to translate directly</div></div>
+<div class="line"><div class="line-num">15</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">16</div><div class="line-content">If a URL is given, fetch its content first. If neither is provided, ask the user what to translate.</div></div>
+<div class="line"><div class="line-num">17</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">18</div><div class="line-content">## Workflow</div></div>
+<div class="line"><div class="line-num">19</div><div class="line-content"></div></div>
+<div class="line removed"><div class="line-num">20</div><div class="line-content">### Step 1: Get the source content</div></div>
+<div class="line empty"><div class="line-num"></div><div class="line-content"></div></div>
+<div class="line empty"><div class="line-num"></div><div class="line-content"></div></div>
+<div class="line empty"><div class="line-num"></div><div class="line-content"></div></div>
+<div class="line empty"><div class="line-num"></div><div class="line-content"></div></div>
+<div class="line empty"><div class="line-num"></div><div class="line-content"></div></div>
+<div class="line empty"><div class="line-num"></div><div class="line-content"></div></div>
+<div class="line empty"><div class="line-num"></div><div class="line-content"></div></div>
+<div class="line empty"><div class="line-num"></div><div class="line-content"></div></div>
+<div class="line empty"><div class="line-num"></div><div class="line-content"></div></div>
+<div class="line empty"><div class="line-num"></div><div class="line-content"></div></div>
+<div class="line empty"><div class="line-num"></div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">21</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">22</div><div class="line-content">**If URL:** Use WebFetch to retrieve the page content. Extract the article body — strip navigation, footers, ads, cookie banners. Keep headings, paragraphs, lists, tables, code blocks, and images.</div></div>
+<div class="line"><div class="line-num">23</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">24</div><div class="line-content">**If text:** Use the text as-is.</div></div>
+<div class="line"><div class="line-num">25</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">26</div><div class="line-content">### Step 2: Analyze before translating</div></div>
+<div class="line"><div class="line-num">27</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">28</div><div class="line-content">Before translating, scan the source for:</div></div>
+<div class="line"><div class="line-num">29</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">30</div><div class="line-content">1. **Ambiguous terms** — nouns used as subjects or objects with unclear referents. For example, "System" in an article about Claude agents could mean the OS, the AI system, or the orchestration layer. Identify every such term.</div></div>
+<div class="line"><div class="line-num">31</div><div class="line-content">2. **Technical terms and keywords** — match against the term list below; note any new terms not in the list.</div></div>
+<div class="line"><div class="line-num">32</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">33</div><div class="line-content">### Step 3: Translate to Chinese</div></div>
+<div class="line"><div class="line-num">34</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">35</div><div class="line-content">Follow these style rules strictly — they define the voice and quality of the translation:</div></div>
+<div class="line"><div class="line-num">36</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">37</div><div class="line-content">**精简短句，不说废话。**</div></div>
+<div class="line"><div class="line-num">38</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">39</div><div class="line-content">- Use the shortest sentence that carries the full meaning. If a sentence can be split, split it.</div></div>
+<div class="line"><div class="line-num">40</div><div class="line-content">- Classical Chinese (古文) phrasing is welcome when it makes the sentence tighter. For example, prefer "此法可行" over "这种方法是可以行得通的".</div></div>
+<div class="line"><div class="line-num">41</div><div class="line-content">- Never pad sentences. No filler words. No rhetorical flourishes. No "值得注意的是", "众所周知", "不言而喻".</div></div>
+<div class="line"><div class="line-num">42</div><div class="line-content">- Avoid passive voice where active voice is shorter. Prefer "模型生成回复" over "回复被模型所生成".</div></div>
+<div class="line"><div class="line-num">43</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">44</div><div class="line-content">**译者注：消除歧义。**</div></div>
+<div class="line"><div class="line-num">45</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">46</div><div class="line-content">- When a term in the original is ambiguous — especially nouns whose referent is unclear from context — add a translator note right after the term.</div></div>
+<div class="line"><div class="line-num">47</div><div class="line-content">- Format: `&lt;span class="translator-note"&gt;（译者注：指xxx）&lt;/span&gt;`</div></div>
+<div class="line"><div class="line-num">48</div><div class="line-content">- This is not optional. Ambiguity in the original must not silently pass into the translation. The reader deserves clarity the original author didn't provide.</div></div>
+<div class="line"><div class="line-num">49</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">50</div><div class="line-content">**术语保留英文。**</div></div>
+<div class="line"><div class="line-num">51</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">52</div><div class="line-content">- Technical terms and keywords stay in English. Wrap them in `&lt;span class="term"&gt;...&lt;/span&gt;`.</div></div>
+<div class="line"><div class="line-num">53</div><div class="line-content">- If a term has a well-known Chinese equivalent that readers expect, use both: Chinese first, English in parentheses on first occurrence. E.g., "延迟（latency）". After that, use the English term alone.</div></div>
+<div class="line"><div class="line-num">54</div><div class="line-content">- See the term list below. If you encounter a technical term not on the list, keep it in English and apply the same styling.</div></div>
+<div class="line"><div class="line-num">55</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">56</div><div class="line-content">**保留结构。**</div></div>
+<div class="line"><div class="line-num">57</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">58</div><div class="line-content">- Preserve headings, lists, tables, code blocks, blockquotes from the original.</div></div>
+<div class="line"><div class="line-num">59</div><div class="line-content">- Code blocks must not be translated — keep them exactly as-is.</div></div>
+<div class="line"><div class="line-num">60</div><div class="line-content">- If the original has section numbering, keep it.</div></div>
+<div class="line"><div class="line-num">61</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">62</div><div class="line-content">### Step 4: Generate the HTML file</div></div>
+<div class="line"><div class="line-num">63</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">64</div><div class="line-content">Create a single, self-contained HTML file.</div></div>
+<div class="line"><div class="line-num">65</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">66</div><div class="line-content">**Structure:**</div></div>
+<div class="line"><div class="line-num">67</div><div class="line-content">- `&lt;h1&gt;` for the article title (Chinese translation, with original English title in a subtitle)</div></div>
+<div class="line"><div class="line-num">68</div><div class="line-content">- `&lt;h2&gt;` for sections, `&lt;h3&gt;` for subsections</div></div>
+<div class="line"><div class="line-num">69</div><div class="line-content">- Tables as `&lt;table&gt;` with styled headers</div></div>
+<div class="line"><div class="line-num">70</div><div class="line-content">- Code blocks in `&lt;pre&gt;&lt;code&gt;` with syntax highlighting class if language is identifiable</div></div>
+<div class="line"><div class="line-num">71</div><div class="line-content">- Blockquotes with `&lt;blockquote&gt;`</div></div>
+<div class="line"><div class="line-num">72</div><div class="line-content">- Original source URL (if any) linked at the top</div></div>
+<div class="line"><div class="line-num">73</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">74</div><div class="line-content">**Styling (inline `&lt;style&gt;` block):**</div></div>
+<div class="line"><div class="line-num">75</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">76</div><div class="line-content">```css</div></div>
+<div class="line"><div class="line-num">77</div><div class="line-content">body {</div></div>
+<div class="line"><div class="line-num">78</div><div class="line-content">  font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;</div></div>
+<div class="line"><div class="line-num">79</div><div class="line-content">  max-width: 860px;</div></div>
+<div class="line"><div class="line-num">80</div><div class="line-content">  margin: 0 auto;</div></div>
+<div class="line"><div class="line-num">81</div><div class="line-content">  padding: 2rem 1rem;</div></div>
+<div class="line"><div class="line-num">82</div><div class="line-content">  line-height: 1.85;</div></div>
+<div class="line"><div class="line-num">83</div><div class="line-content">  color: #1a1a1a;</div></div>
+<div class="line"><div class="line-num">84</div><div class="line-content">  background: #fff;</div></div>
+<div class="line"><div class="line-num">85</div><div class="line-content">}</div></div>
+<div class="line"><div class="line-num">86</div><div class="line-content">h1, h2, h3 { color: #1a56db; margin-top: 2rem; }</div></div>
+<div class="line"><div class="line-num">87</div><div class="line-content">h1 { font-size: 1.8rem; border-bottom: 2px solid #1a56db; padding-bottom: 0.5rem; }</div></div>
+<div class="line"><div class="line-num">88</div><div class="line-content">.subtitle { color: #666; font-size: 1rem; font-weight: normal; margin-top: 0.25rem; }</div></div>
+<div class="line"><div class="line-num">89</div><div class="line-content">.source-link { color: #666; font-size: 0.9rem; margin-bottom: 2rem; display: block; }</div></div>
+<div class="line"><div class="line-num">90</div><div class="line-content">.term { color: #1a56db; font-weight: bold; font-style: italic; }</div></div>
+<div class="line"><div class="line-num">91</div><div class="line-content">.translator-note { color: #b45309; font-size: 0.9em; font-style: italic; }</div></div>
+<div class="line"><div class="line-num">92</div><div class="line-content">pre { background: #f5f5f5; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.9rem; }</div></div>
+<div class="line"><div class="line-num">93</div><div class="line-content">code { font-family: Consolas, "Courier New", monospace; }</div></div>
+<div class="line"><div class="line-num">94</div><div class="line-content">blockquote { border-left: 4px solid #1a56db; margin: 1rem 0; padding: 0.5rem 1rem; color: #555; background: #f8f9fa; }</div></div>
+<div class="line"><div class="line-num">95</div><div class="line-content">table { border-collapse: collapse; width: 100%; margin: 1rem 0; }</div></div>
+<div class="line"><div class="line-num">96</div><div class="line-content">th { background: #1a56db; color: #fff; padding: 0.6rem 1rem; text-align: left; }</div></div>
+<div class="line"><div class="line-num">97</div><div class="line-content">td { padding: 0.6rem 1rem; border-bottom: 1px solid #e5e7eb; }</div></div>
+<div class="line"><div class="line-num">98</div><div class="line-content">tr:nth-child(even) { background: #f8f9fa; }</div></div>
+<div class="line"><div class="line-num">99</div><div class="line-content">img { max-width: 100%; height: auto; }</div></div>
+<div class="line"><div class="line-num">100</div><div class="line-content">```</div></div>
+<div class="line"><div class="line-num">101</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">102</div><div class="line-content">**File location:** Save as `&lt;original-title-slug&gt;_zh.html` in the current working directory.</div></div>
+<div class="line"><div class="line-num">103</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">104</div><div class="line-content">### Step 5: Open in browser</div></div>
+<div class="line"><div class="line-num">105</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">106</div><div class="line-content">```bash</div></div>
+<div class="line"><div class="line-num">107</div><div class="line-content">start chrome "&lt;path_to_html&gt;"</div></div>
+<div class="line"><div class="line-num">108</div><div class="line-content">```</div></div>
+<div class="line"><div class="line-num">109</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">110</div><div class="line-content">If Chrome is not available, tell the user the file path so they can open it manually.</div></div>
+<div class="line"><div class="line-num">111</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">112</div><div class="line-content">## Technical Term List</div></div>
+<div class="line"><div class="line-num">113</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">114</div><div class="line-content">Keep these terms in English (wrap in `.term` span). This list grows over time:</div></div>
+<div class="line"><div class="line-num">115</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">116</div><div class="line-content">**AI / ML:**</div></div>
+<div class="line"><div class="line-num">117</div><div class="line-content">agent, prompt, token, context window, fine-tuning, embedding, inference, model, transformer, attention, RAG (retrieval-augmented generation), hallucination, guardrail, tool use, function calling, chain-of-thought, few-shot, zero-shot, RLHF, reward model, alignment, benchmark, evaluation, system prompt, multi-modal, grounding</div></div>
+<div class="line"><div class="line-num">118</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">119</div><div class="line-content">**Software Engineering:**</div></div>
+<div class="line"><div class="line-num">120</div><div class="line-content">API, SDK, framework, microservice, container, orchestration, pipeline, CI/CD, deployment, rollback, latency, throughput, scalability, fault tolerance, load balancer, cache, middleware, webhook, endpoint, runtime, compiler, garbage collection, thread, async, callback, promise, dependency injection, design pattern, anti-pattern, refactor, technical debt</div></div>
+<div class="line"><div class="line-num">121</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">122</div><div class="line-content">**Infrastructure / Cloud:**</div></div>
+<div class="line"><div class="line-num">123</div><div class="line-content">Kubernetes, Docker, serverless, CDN, DNS, SSL/TLS, VPC, IAM, S3, EC2, Lambda, Azure, GCP, AWS, terraform, nginx, reverse proxy, service mesh, observability, metrics, tracing, logging</div></div>
+<div class="line"><div class="line-num">124</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">125</div><div class="line-content">**Data:**</div></div>
+<div class="line"><div class="line-num">126</div><div class="line-content">schema, query, index, migration, ORM, transaction, ACID, partition, shard, replication, streaming, batch processing, ETL, data lake, data warehouse</div></div>
+<div class="line"><div class="line-num">127</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">128</div><div class="line-content">## Output summary</div></div>
+<div class="line"><div class="line-num">129</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">130</div><div class="line-content">Tell the user:</div></div>
+<div class="line"><div class="line-num">131</div><div class="line-content">- Where the HTML file was saved</div></div>
+<div class="line"><div class="line-num">132</div><div class="line-content">- Article title (original and translated)</div></div>
+<div class="line"><div class="line-num">133</div><div class="line-content">- Any translator notes added (list the ambiguous terms you annotated)</div></div>
+<div class="line"><div class="line-num">134</div><div class="line-content">- Any new technical terms encountered that weren't in the list above</div></div>
+</div>
+
+<!-- RIGHT: UPDATED -->
+<div class="diff-side">
+<div class="side-header updated">Updated (after — with TaskCreate tracking)</div>
+<div class="line"><div class="line-num">1</div><div class="line-content">---</div></div>
+<div class="line"><div class="line-num">2</div><div class="line-content">name: translate</div></div>
+<div class="line"><div class="line-num">3</div><div class="line-content">description: Translate a tech blog, tech doc, or a piece of text into Chinese with a concise, sharp style and output a styled HTML file. Use this skill whenever the user wants to translate a tech article, blog post, documentation, or text into Chinese, or says "translate this", "翻译", "/translate &lt;url&gt;", or wants to convert English tech content into readable Chinese. Also trigger when the user provides a URL or text and asks for a Chinese translation. This skill is specifically for tech content translation — not for book chapters (use translate-book for PDFs).</div></div>
+<div class="line"><div class="line-num">4</div><div class="line-content">---</div></div>
+<div class="line"><div class="line-num">5</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">6</div><div class="line-content"># Translate: Tech Content → Chinese HTML</div></div>
+<div class="line"><div class="line-num">7</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">8</div><div class="line-content">Translate English tech blogs, docs, or text into Chinese. Output a single styled HTML file.</div></div>
+<div class="line"><div class="line-num">9</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">10</div><div class="line-content">## Arguments</div></div>
+<div class="line"><div class="line-num">11</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">12</div><div class="line-content">The user provides either:</div></div>
+<div class="line"><div class="line-num">13</div><div class="line-content">- A **URL** to a tech blog or doc (e.g., `/translate https://example.com/article`)</div></div>
+<div class="line"><div class="line-num">14</div><div class="line-content">- A **block of text** to translate directly</div></div>
+<div class="line"><div class="line-num">15</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">16</div><div class="line-content">If a URL is given, fetch its content first. If neither is provided, ask the user what to translate.</div></div>
+<div class="line"><div class="line-num">17</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">18</div><div class="line-content">## Workflow</div></div>
+<div class="line"><div class="line-num">19</div><div class="line-content"></div></div>
+<div class="line added" style="background:#fff3cd; border-left:3px solid #f59e0b;"><div class="line-num" style="background:#fef3c7;"></div><div class="line-content" style="background:#fff3cd; color:#92400e; font-weight:bold; font-family:'Segoe UI',sans-serif;">Tips for learners: The newly added lines are all about using TaskCreate (tracking task) to avoid steps being skipped silently by LLM.</div></div>
+<div class="line added"><div class="line-num">20</div><div class="line-content">**IMPORTANT: You MUST complete ALL 5 steps below. Do NOT skip any step.**</div></div>
+<div class="line added"><div class="line-num">21</div><div class="line-content"></div></div>
+<div class="line added"><div class="line-num">22</div><div class="line-content">Before starting any work, use TaskCreate to create a task for each step:</div></div>
+<div class="line added"><div class="line-num">23</div><div class="line-content">1. "Step 1: Get the source content"</div></div>
+<div class="line added"><div class="line-num">24</div><div class="line-content">2. "Step 2: Analyze before translating"</div></div>
+<div class="line added"><div class="line-num">25</div><div class="line-content">3. "Step 3: Translate to Chinese"</div></div>
+<div class="line added"><div class="line-num">26</div><div class="line-content">4. "Step 4: Generate the HTML file"</div></div>
+<div class="line added"><div class="line-num">27</div><div class="line-content">5. "Step 5: Open in browser"</div></div>
+<div class="line added"><div class="line-num">28</div><div class="line-content"></div></div>
+<div class="line added"><div class="line-num">29</div><div class="line-content">As you work, update each task to "in_progress" when you start it and "completed" when you finish it. Do NOT start the next step until the current step is marked completed.</div></div>
+<div class="line added"><div class="line-num">30</div><div class="line-content"></div></div>
+<div class="line added"><div class="line-num">31</div><div class="line-content">### Step 1: Get the source content</div></div>
+<div class="line"><div class="line-num">32</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">33</div><div class="line-content">**If URL:** Use WebFetch to retrieve the page content. Extract the article body — strip navigation, footers, ads, cookie banners. Keep headings, paragraphs, lists, tables, code blocks, and images.</div></div>
+<div class="line"><div class="line-num">34</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">35</div><div class="line-content">**If text:** Use the text as-is.</div></div>
+<div class="line"><div class="line-num">36</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">37</div><div class="line-content">### Step 2: Analyze before translating</div></div>
+<div class="line"><div class="line-num">38</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">39</div><div class="line-content">Before translating, scan the source for:</div></div>
+<div class="line"><div class="line-num">40</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">41</div><div class="line-content">1. **Ambiguous terms** — nouns used as subjects or objects with unclear referents. For example, "System" in an article about Claude agents could mean the OS, the AI system, or the orchestration layer. Identify every such term.</div></div>
+<div class="line"><div class="line-num">42</div><div class="line-content">2. **Technical terms and keywords** — match against the term list below; note any new terms not in the list.</div></div>
+<div class="line"><div class="line-num">43</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">44</div><div class="line-content">### Step 3: Translate to Chinese</div></div>
+<div class="line"><div class="line-num">45</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">46</div><div class="line-content">Follow these style rules strictly — they define the voice and quality of the translation:</div></div>
+<div class="line"><div class="line-num">47</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">48</div><div class="line-content">**精简短句，不说废话。**</div></div>
+<div class="line"><div class="line-num">49</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">50</div><div class="line-content">- Use the shortest sentence that carries the full meaning. If a sentence can be split, split it.</div></div>
+<div class="line"><div class="line-num">51</div><div class="line-content">- Classical Chinese (古文) phrasing is welcome when it makes the sentence tighter. For example, prefer "此法可行" over "这种方法是可以行得通的".</div></div>
+<div class="line"><div class="line-num">52</div><div class="line-content">- Never pad sentences. No filler words. No rhetorical flourishes. No "值得注意的是", "众所周知", "不言而喻".</div></div>
+<div class="line"><div class="line-num">53</div><div class="line-content">- Avoid passive voice where active voice is shorter. Prefer "模型生成回复" over "回复被模型所生成".</div></div>
+<div class="line"><div class="line-num">54</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">55</div><div class="line-content">**译者注：消除歧义。**</div></div>
+<div class="line"><div class="line-num">56</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">57</div><div class="line-content">- When a term in the original is ambiguous — especially nouns whose referent is unclear from context — add a translator note right after the term.</div></div>
+<div class="line"><div class="line-num">58</div><div class="line-content">- Format: `&lt;span class="translator-note"&gt;（译者注：指xxx）&lt;/span&gt;`</div></div>
+<div class="line"><div class="line-num">59</div><div class="line-content">- This is not optional. Ambiguity in the original must not silently pass into the translation. The reader deserves clarity the original author didn't provide.</div></div>
+<div class="line"><div class="line-num">60</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">61</div><div class="line-content">**术语保留英文。**</div></div>
+<div class="line"><div class="line-num">62</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">63</div><div class="line-content">- Technical terms and keywords stay in English. Wrap them in `&lt;span class="term"&gt;...&lt;/span&gt;`.</div></div>
+<div class="line"><div class="line-num">64</div><div class="line-content">- If a term has a well-known Chinese equivalent that readers expect, use both: Chinese first, English in parentheses on first occurrence. E.g., "延迟（latency）". After that, use the English term alone.</div></div>
+<div class="line"><div class="line-num">65</div><div class="line-content">- See the term list below. If you encounter a technical term not on the list, keep it in English and apply the same styling.</div></div>
+<div class="line"><div class="line-num">66</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">67</div><div class="line-content">**保留结构。**</div></div>
+<div class="line"><div class="line-num">68</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">69</div><div class="line-content">- Preserve headings, lists, tables, code blocks, blockquotes from the original.</div></div>
+<div class="line"><div class="line-num">70</div><div class="line-content">- Code blocks must not be translated — keep them exactly as-is.</div></div>
+<div class="line"><div class="line-num">71</div><div class="line-content">- If the original has section numbering, keep it.</div></div>
+<div class="line"><div class="line-num">72</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">73</div><div class="line-content">### Step 4: Generate the HTML file</div></div>
+<div class="line"><div class="line-num">74</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">75</div><div class="line-content">Create a single, self-contained HTML file.</div></div>
+<div class="line"><div class="line-num">76</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">77</div><div class="line-content">**Structure:**</div></div>
+<div class="line"><div class="line-num">78</div><div class="line-content">- `&lt;h1&gt;` for the article title (Chinese translation, with original English title in a subtitle)</div></div>
+<div class="line"><div class="line-num">79</div><div class="line-content">- `&lt;h2&gt;` for sections, `&lt;h3&gt;` for subsections</div></div>
+<div class="line"><div class="line-num">80</div><div class="line-content">- Tables as `&lt;table&gt;` with styled headers</div></div>
+<div class="line"><div class="line-num">81</div><div class="line-content">- Code blocks in `&lt;pre&gt;&lt;code&gt;` with syntax highlighting class if language is identifiable</div></div>
+<div class="line"><div class="line-num">82</div><div class="line-content">- Blockquotes with `&lt;blockquote&gt;`</div></div>
+<div class="line"><div class="line-num">83</div><div class="line-content">- Original source URL (if any) linked at the top</div></div>
+<div class="line"><div class="line-num">84</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">85</div><div class="line-content">**Styling (inline `&lt;style&gt;` block):**</div></div>
+<div class="line"><div class="line-num">86</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">87</div><div class="line-content">```css</div></div>
+<div class="line"><div class="line-num">88</div><div class="line-content">body {</div></div>
+<div class="line"><div class="line-num">89</div><div class="line-content">  font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;</div></div>
+<div class="line"><div class="line-num">90</div><div class="line-content">  max-width: 860px;</div></div>
+<div class="line"><div class="line-num">91</div><div class="line-content">  margin: 0 auto;</div></div>
+<div class="line"><div class="line-num">92</div><div class="line-content">  padding: 2rem 1rem;</div></div>
+<div class="line"><div class="line-num">93</div><div class="line-content">  line-height: 1.85;</div></div>
+<div class="line"><div class="line-num">94</div><div class="line-content">  color: #1a1a1a;</div></div>
+<div class="line"><div class="line-num">95</div><div class="line-content">  background: #fff;</div></div>
+<div class="line"><div class="line-num">96</div><div class="line-content">}</div></div>
+<div class="line"><div class="line-num">97</div><div class="line-content">h1, h2, h3 { color: #1a56db; margin-top: 2rem; }</div></div>
+<div class="line"><div class="line-num">98</div><div class="line-content">h1 { font-size: 1.8rem; border-bottom: 2px solid #1a56db; padding-bottom: 0.5rem; }</div></div>
+<div class="line"><div class="line-num">99</div><div class="line-content">.subtitle { color: #666; font-size: 1rem; font-weight: normal; margin-top: 0.25rem; }</div></div>
+<div class="line"><div class="line-num">100</div><div class="line-content">.source-link { color: #666; font-size: 0.9rem; margin-bottom: 2rem; display: block; }</div></div>
+<div class="line"><div class="line-num">101</div><div class="line-content">.term { color: #1a56db; font-weight: bold; font-style: italic; }</div></div>
+<div class="line"><div class="line-num">102</div><div class="line-content">.translator-note { color: #b45309; font-size: 0.9em; font-style: italic; }</div></div>
+<div class="line"><div class="line-num">103</div><div class="line-content">pre { background: #f5f5f5; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.9rem; }</div></div>
+<div class="line"><div class="line-num">104</div><div class="line-content">code { font-family: Consolas, "Courier New", monospace; }</div></div>
+<div class="line"><div class="line-num">105</div><div class="line-content">blockquote { border-left: 4px solid #1a56db; margin: 1rem 0; padding: 0.5rem 1rem; color: #555; background: #f8f9fa; }</div></div>
+<div class="line"><div class="line-num">106</div><div class="line-content">table { border-collapse: collapse; width: 100%; margin: 1rem 0; }</div></div>
+<div class="line"><div class="line-num">107</div><div class="line-content">th { background: #1a56db; color: #fff; padding: 0.6rem 1rem; text-align: left; }</div></div>
+<div class="line"><div class="line-num">108</div><div class="line-content">td { padding: 0.6rem 1rem; border-bottom: 1px solid #e5e7eb; }</div></div>
+<div class="line"><div class="line-num">109</div><div class="line-content">tr:nth-child(even) { background: #f8f9fa; }</div></div>
+<div class="line"><div class="line-num">110</div><div class="line-content">img { max-width: 100%; height: auto; }</div></div>
+<div class="line"><div class="line-num">111</div><div class="line-content">```</div></div>
+<div class="line"><div class="line-num">112</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">113</div><div class="line-content">**File location:** Save as `&lt;original-title-slug&gt;_zh.html` in the current working directory.</div></div>
+<div class="line"><div class="line-num">114</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">115</div><div class="line-content">### Step 5: Open in browser</div></div>
+<div class="line"><div class="line-num">116</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">117</div><div class="line-content">```bash</div></div>
+<div class="line"><div class="line-num">118</div><div class="line-content">start chrome "&lt;path_to_html&gt;"</div></div>
+<div class="line"><div class="line-num">119</div><div class="line-content">```</div></div>
+<div class="line"><div class="line-num">120</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">121</div><div class="line-content">If Chrome is not available, tell the user the file path so they can open it manually.</div></div>
+<div class="line"><div class="line-num">122</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">123</div><div class="line-content">## Technical Term List</div></div>
+<div class="line"><div class="line-num">124</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">125</div><div class="line-content">Keep these terms in English (wrap in `.term` span). This list grows over time:</div></div>
+<div class="line"><div class="line-num">126</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">127</div><div class="line-content">**AI / ML:**</div></div>
+<div class="line"><div class="line-num">128</div><div class="line-content">agent, prompt, token, context window, fine-tuning, embedding, inference, model, transformer, attention, RAG (retrieval-augmented generation), hallucination, guardrail, tool use, function calling, chain-of-thought, few-shot, zero-shot, RLHF, reward model, alignment, benchmark, evaluation, system prompt, multi-modal, grounding</div></div>
+<div class="line"><div class="line-num">129</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">130</div><div class="line-content">**Software Engineering:**</div></div>
+<div class="line"><div class="line-num">131</div><div class="line-content">API, SDK, framework, microservice, container, orchestration, pipeline, CI/CD, deployment, rollback, latency, throughput, scalability, fault tolerance, load balancer, cache, middleware, webhook, endpoint, runtime, compiler, garbage collection, thread, async, callback, promise, dependency injection, design pattern, anti-pattern, refactor, technical debt</div></div>
+<div class="line"><div class="line-num">132</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">133</div><div class="line-content">**Infrastructure / Cloud:**</div></div>
+<div class="line"><div class="line-num">134</div><div class="line-content">Kubernetes, Docker, serverless, CDN, DNS, SSL/TLS, VPC, IAM, S3, EC2, Lambda, Azure, GCP, AWS, terraform, nginx, reverse proxy, service mesh, observability, metrics, tracing, logging</div></div>
+<div class="line"><div class="line-num">135</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">136</div><div class="line-content">**Data:**</div></div>
+<div class="line"><div class="line-num">137</div><div class="line-content">schema, query, index, migration, ORM, transaction, ACID, partition, shard, replication, streaming, batch processing, ETL, data lake, data warehouse</div></div>
+<div class="line"><div class="line-num">138</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">139</div><div class="line-content">## Output summary</div></div>
+<div class="line"><div class="line-num">140</div><div class="line-content"></div></div>
+<div class="line"><div class="line-num">141</div><div class="line-content">Tell the user:</div></div>
+<div class="line"><div class="line-num">142</div><div class="line-content">- Where the HTML file was saved</div></div>
+<div class="line"><div class="line-num">143</div><div class="line-content">- Article title (original and translated)</div></div>
+<div class="line"><div class="line-num">144</div><div class="line-content">- Any translator notes added (list the ambiguous terms you annotated)</div></div>
+<div class="line"><div class="line-num">145</div><div class="line-content">- Any new technical terms encountered that weren't in the list above</div></div>
+</div>
+
+</div><!-- end diff-container -->
+
+</body>
+</html>
