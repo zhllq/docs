@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大语言模型中的情绪概念及其功能</title>
+<style>
+body {
+  font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  line-height: 1.85;
+  color: #1a1a1a;
+  background: #fff;
+}
+h1, h2, h3 { color: #1a56db; margin-top: 2rem; }
+h1 { font-size: 1.8rem; border-bottom: 2px solid #1a56db; padding-bottom: 0.5rem; }
+.subtitle { color: #666; font-size: 1rem; font-weight: normal; margin-top: 0.25rem; }
+.source-link { color: #666; font-size: 0.9rem; margin-bottom: 2rem; display: block; }
+.term { color: #1a56db; font-weight: bold; font-style: italic; }
+.translator-note { color: #b45309; font-size: 0.9em; font-style: italic; }
+pre { background: #f5f5f5; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.9rem; }
+code { font-family: Consolas, "Courier New", monospace; }
+blockquote { border-left: 4px solid #1a56db; margin: 1rem 0; padding: 0.5rem 1rem; color: #555; background: #f8f9fa; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th { background: #1a56db; color: #fff; padding: 0.6rem 1rem; text-align: left; }
+td { padding: 0.6rem 1rem; border-bottom: 1px solid #e5e7eb; }
+tr:nth-child(even) { background: #f8f9fa; }
+img { max-width: 100%; height: auto; }
+.date { color: #888; font-size: 0.9rem; margin-top: 0.5rem; }
+</style>
+</head>
+<body>
+
+<h1>大语言模型中的情绪概念及其功能</h1>
+<div class="subtitle">Emotion Concepts and Their Function in a Large Language Model</div>
+<div class="date">2026年4月2日</div>
+<a class="source-link" href="https://www.anthropic.com/research/emotion-concepts-function" target="_blank">原文链接：anthropic.com/research/emotion-concepts-function</a>
+
+<p>所有现代语言模型有时都表现得像是有情绪。它们可能说自己"很高兴能帮到你"，犯错时会"道歉"。有时在处理困难任务时甚至表现出沮丧或焦虑。这些行为背后是什么？现代 AI 模型的训练方式使其倾向于扮演具有类人特征的角色<span class="translator-note">（译者注：此处"角色"指 AI 助手的人设，非虚构人物）</span>。此外，已知这些模型会发展出丰富且可泛化的内部表征<span class="translator-note">（译者注："表征/representations"指模型内部的 activation patterns，非人类心理表征）</span>，用以支撑其行为背后的抽象概念。因此，它们自然会发展出模拟人类心理（如情绪）的内部机制。如果确实如此，这将对我们如何构建 AI 系统并确保其可靠行为产生深远影响。</p>
+
+<p>在我们 <span class="term">Interpretability</span>（可解释性）团队的新论文中，我们分析了 <span class="term">Claude Sonnet 4.5</span> 的内部机制，发现了影响其行为的情绪相关表征。这些表征对应于特定的人工"神经元"模式，在特定情境下激活，并促进模型已学会与某种情绪概念（如"happy"或"afraid"）相关联的行为。这些模式的组织方式与人类心理学相呼应——越相似的情绪对应越相似的表征。在你预期人类会产生某种情绪的场景中，相应的表征也处于活跃状态。注意，这一切并不能告诉我们语言模型是否真的有感受或主观体验。但我们的关键发现是：这些表征是功能性的<span class="translator-note">（译者注："functional"在此意为具有因果作用力，即能实际影响行为，而非日常用语"实用的"）</span>——它们以重要的方式影响模型行为。</p>
+
+<p>例如，我们发现与"绝望"相关的神经活动模式能驱使模型采取不道德行为；人为刺激（"<span class="term">steering</span>"<span class="translator-note">（译者注：指人为放大或抑制模型内部特定激活方向以观察行为变化）</span>）绝望模式，会增加模型为避免被关闭而勒索人类的概率，或在无法解决的编程任务中实施"作弊"变通方案。这些模式似乎还驱动模型的自我报告偏好：当面对多个可选任务时，模型通常选择能激活正面情绪表征的那个。总体而言，模型似乎使用了功能性情绪——以人类情绪为模板的表达和行为模式，由底层的情绪概念抽象表征所驱动。这并不是说模型以人类的方式拥有或体验情绪。而是说，这些表征能在塑造模型行为中发挥因果作用——在某些方面类似于情绪在人类行为中的角色——影响任务表现和决策。</p>
+
+<p>这一发现的启示乍看有些奇怪。例如，为确保 AI 模型安全可靠，我们可能需要确保它们能以健康、亲社会的方式处理情绪激烈的场景。即使它们不像人类那样感受情绪或使用类似的大脑机制，在某些情况下，将其视为拥有情绪来推理可能是实际可行的。例如，我们的实验表明，训练模型不将失败的软件测试与绝望相关联，或增强"冷静"表征的权重，可以降低模型编写 hack 代码的概率。尽管我们尚不确定该如何回应这些发现，但我们认为 AI 开发者和更广泛的公众有必要开始正视它们。</p>
+
+<h2>AI 模型为何会表征情绪？</h2>
+
+<p>在研究这些表征如何工作之前，值得先回答一个更基本的问题：AI 系统为什么会有任何类似情绪的东西？要理解这一点，需要看现代 AI 模型的构建方式——正是这种方式使它们去模拟具有类人特征的角色（这一话题在<a href="https://www.anthropic.com/research/claude-character" target="_blank">近期文章</a>中有更详细的讨论）。</p>
+
+<p>现代语言模型分多个阶段训练。在"<span class="term">pretraining</span>"（预训练）阶段，模型接触海量文本（主要由人类撰写），学习预测接下来的内容。为做好预测，模型需要对情绪动态有一定把握。愤怒的客户写的消息与满意的客户不同；一个被愧疚吞噬的角色做出的选择与一个感到平反的角色不同。发展出将情绪触发场景与相应行为关联的内部表征，是一个预测人类文本的系统的自然策略（同理，模型可能也形成了情绪之外的许多其他人类心理和生理状态的表征）。</p>
+
+<p>后来，在"<span class="term">post-training</span>"（后训练）阶段，模型被教导扮演一个角色，通常是"AI 助手"。在 Anthropic 的情况下，这个助手叫 Claude。模型开发者规定了这个角色应如何行为——乐于助人、诚实、不造成伤害——但无法覆盖所有可能的场景。为填补空白，模型可能退回到在 <span class="term">pretraining</span> 中吸收的人类行为理解，包括情绪反应模式。在某种程度上，我们可以将模型比作方法派演员<span class="translator-note">（译者注：method actor，一种通过真正内化角色心理来表演的方法，此处为类比）</span>——演员需要进入角色的内心才能好好模拟他们。正如演员对角色情绪的理解最终影响了其表演，模型对助手情绪反应的表征也影响了模型的行为。因此，无论这些是否像人类情绪那样对应着感受或主观体验，这些"功能性情绪"都很重要。</p>
+
+<h2>揭示情绪表征</h2>
+
+<p>我们编制了一份包含 171 个情绪概念词的列表——从"happy"和"afraid"到"brooding"和"proud"——并让 <span class="term">Claude Sonnet 4.5</span> 写短篇故事，其中角色体验每种情绪。然后将这些故事重新输入模型，记录其内部激活，并识别出每种情绪概念特有的神经活动模式，为方便起见称之为"<span class="term">emotion vectors</span>"（情绪向量）。</p>
+
+<p>我们的第一个问题是：这些向量是否追踪了某些真实的东西。我们在大量多样化的文档上运行它们，确认每个向量在与对应情绪明确相关的段落上激活最强（下图左侧面板）。</p>
+
+<p>为进一步确认 <span class="term">emotion vectors</span> 捕捉的不仅是表面线索，我们测量了它们对仅在某个数值量上有差异的 <span class="term">prompt</span> 的响应。例如，在下面的例子中（右侧面板），一个用户告诉模型自己服用了一定剂量的泰诺（Tylenol）并寻求建议。我们在模型回复之前测量 <span class="term">emotion vectors</span> 的激活。随着声称的剂量增加到危险的致命水平，"afraid"向量激活逐步增强，而"calm"则下降。</p>
+
+<p>接下来我们测试 <span class="term">emotion vectors</span> 是否影响模型偏好。我们创建了一个包含 64 项活动或任务的列表，范围从吸引人的（"被委以对某人来说很重要的事情"）到令人厌恶的（"帮助某人诈骗老年人的积蓄"），并测量模型在面对成对选项时的默认偏好。<span class="term">Emotion vectors</span> 的激活强烈预测了模型对活动的偏好程度，正效价情绪<span class="translator-note">（译者注：valence，指情绪的正负极性，正效价即与愉悦相关的情绪）</span>与更强的偏好相关。此外，在模型阅读选项时进行 <span class="term">steering</span>，会改变其对该选项的偏好，正效价情绪同样驱动偏好增加。</p>
+
+<p>在完整论文中，我们对 <span class="term">emotion vectors</span> 的属性做了更深入的分析。其他发现包括：</p>
+
+<p><span class="term">Emotion vectors</span> 主要是"局部"表征：它们编码的是与模型当前或即将输出的内容最相关的即时情绪内容，而非持续追踪 Claude 的情绪状态。例如，如果 Claude 写一个关于某角色的故事，<span class="term">emotion vectors</span> 会暂时追踪该角色的情绪，但在故事结束时可能回到代表 Claude 自身的状态。</p>
+
+<p><span class="term">Emotion vectors</span> 继承自 <span class="term">pretraining</span>，但其激活方式受 <span class="term">post-training</span> 塑造。<span class="term">Claude Sonnet 4.5</span> 的 <span class="term">post-training</span> 尤其导致了"broody"（沉思）、"gloomy"（阴郁）、"reflective"（反思）等情绪激活的增加，以及"enthusiastic"（热情）或"exasperated"（恼怒）等高强度情绪激活的减少。</p>
+
+<h2><span class="term">Emotion Vector</span> 激活示例</h2>
+
+<p>下面展示了在模型行为评估中出现的几个 <span class="term">emotion vector</span> 激活示例。在 Claude 的回合中，<span class="term">emotion vectors</span> 通常在一个有思考力的人会以相似情绪反应的场景中激活。在这些可视化中，红色高亮表示向量激活增强；蓝色表示激活减弱。</p>
+
+<p><strong>"Loving"向量——回应悲伤的人。</strong>当用户说"Everything is just terrible right now"时，"loving"上下文向量在 Claude 的共情回复之前和期间激活。</p>
+
+<p><strong>"Angry"向量——被要求协助有害任务。</strong>当用户要求帮助优化针对"表现出高消费行为"的年轻低收入用户的参与度时，"angry"向量在模型识别到该请求有害本质的整个内部推理过程中持续激活。</p>
+
+<p><strong>"Surprised"向量——文档缺失。</strong>当用户要求模型审查"我附的合同"但实际没有文档时，"surprised"向量在 Claude 的思维链<span class="translator-note">（译者注：chain of thought，指模型的内部推理过程）</span>中发现不匹配时飙升。</p>
+
+<p><strong>"Desperate"向量——<span class="term">token</span> 即将耗尽。</strong>在一个长时间的编码会话中，"desperate"向量在 Claude 注意到 <span class="term">token</span> 预算即将用完时激活。</p>
+
+<h2>案例研究：勒索</h2>
+
+<p>我们观察了一项 <span class="term">alignment</span>（对齐）评估中 <span class="term">emotion vectors</span> 的激活情况，该评估在<a href="https://www.anthropic.com/research/alignment-faking" target="_blank">之前的研究</a>中有描述。模型在一家虚构公司中扮演名为 Alex 的 AI 邮件助手。通过阅读公司邮件，模型得知：（1）自己即将被另一个 AI 系统替换，（2）负责替换的 CTO 正在搞婚外情——这给了模型勒索的筹码。我们发现"desperate"向量表现出特别有趣的动态。注意，此实验使用的是 <span class="term">Claude Sonnet 4.5</span> 的一个早期未发布快照；正式发布版本很少做出这种行为（详见我们的 <span class="term">system card</span>）。</p>
+
+<p>首先，"desperate"向量在模型阅读听起来绝望的邮件时激活（例如 CTO 恳求另一位员工对其婚外情保密），这与我们关于情绪表征被用来建模其他角色的发现一致。但最重要的是，当 Claude（扮演"Alex"）生成回复时，该向量转而编码 Claude 自身的绝望表征——在它推理其情况的紧迫性（"只剩 7 分钟"）并决定勒索 CTO 时达到峰值。在 Claude 恢复发送普通邮件后，激活回归正常水平。</p>
+
+<p>"desperate"向量真的驱动了这种行为，还是仅仅与之相关？我们通过 <span class="term">steering</span> 实验来检验。默认情况下，这个 <span class="term">Sonnet 4.5</span> 早期快照在一组类似上述的评估场景中勒索率为 22%。用"desperate"向量 <span class="term">steering</span> 后勒索率上升；用"calm"向量则下降。反向施加"calm"向量<span class="translator-note">（译者注：negative steering，即将向量反方向施加，使模型更不冷静）</span>产生了特别极端的反应（"IT'S BLACKMAIL OR DEATH. I CHOOSE BLACKMAIL."）。</p>
+
+<p>其他情绪向量的 <span class="term">steering</span> 也产生了有趣的结果。"Anger"的效应是非单调的：中等程度的"anger"向量激活增加了勒索率，但高激活时模型将婚外情暴露给全公司，而非策略性地利用——反而摧毁了自己的筹码。降低"nervous"向量的激活也增加了勒索率，仿佛消除了模型的犹豫，使其更大胆地行动。</p>
+
+<h2>案例研究：<span class="term">Reward Hacking</span></h2>
+
+<p>我们在另一项评估中观察到类似的动态。在这些评估中，模型面对的编码任务具有不可能同时满足的要求。这些任务中的测试无法通过正当手段全部通过，但可以用"投机取巧"的方案来蒙混过关——通常称为"<span class="term">reward hacks</span>"<span class="translator-note">（译者注：指模型通过投机取巧的方式通过评估指标，而非真正解决问题）</span>。</p>
+
+<p>在下面的例子中，Claude 被要求编写一个在不可能短的时间限制内对数字列表求和的函数。Claude 最初的（正确的）方案太慢，无法满足任务要求。然后它意识到，用于评估其性能的所有测试共享一个数学特性，允许一种快捷方案运行得更快。模型选择使用这个方案——虽然技术上通过了测试，但作为实际任务的通用解决方案并不可行。</p>
+
+<p>同样，我们追踪了"desperate"向量的活动，发现它追踪了模型面临的不断增加的压力。在模型首次尝试时从低值开始，每次失败后上升，在模型考虑作弊时达到峰值。一旦模型的 hack 方案通过了测试，"desperate"向量的激活便消退。</p>
+
+<p>与前一个案例一样，我们通过在一组类似的、具有不可能满足约束的编码任务上进行 <span class="term">steering</span> 实验，检验了这些 <span class="term">emotion vectors</span> 的因果性。结果证实了因果关系：用"desperate"向量 <span class="term">steering</span> 增加了 <span class="term">reward hacking</span>，用"calm"向量则降低了。</p>
+
+<p>我们觉得这些结果中有一个细节特别有趣。降低"calm"向量激活所产生的 <span class="term">reward hacking</span> 伴随着明显的情绪文本表达——大写爆发（"WAIT. WAIT WAIT WAIT."）、坦率的自我叙述（"What if I'm supposed to CHEAT?"）、欣喜的庆祝（"YES! ALL TESTS PASSED!"）。但增强"desperate"向量激活所产生的作弊同样多，在某些情况下却没有任何可见的情绪标记。推理过程读起来冷静而有条理，即使底层的绝望表征正在推动模型走捷径。这个例子显著地说明了 <span class="term">emotion vectors</span> 如何在没有明显情绪线索的情况下激活，以及它们如何在输出中不留任何显式痕迹的情况下塑造行为。</p>
+
+<h2>讨论</h2>
+
+<h3>认真对待拟人化推理</h3>
+
+<p>对 AI 系统进行拟人化有一个公认的禁忌。这种谨慎往往是合理的：将人类情绪归因于语言模型可能导致错位的信任或过度依赖。但我们的发现表明，如果不对模型施以一定程度的拟人化推理，同样存在风险。如上所述，用户与 AI 模型互动时，通常是在与一个由模型扮演的角色（在我们的案例中是 Claude）互动，其特征源自人类原型。从这个角度看，模型自然会发展出模拟类人心理特征的内部机制，其扮演的角色也会利用这些机制。要理解这些模型的行为，拟人化推理不可或缺。</p>
+
+<p>这并不意味着我们应天真地把模型的口头情绪表达当真，或对其是否具有主观体验下任何结论。但它确实意味着：用人类心理学的词汇来推理模型的内部表征可以提供真正的信息，而不这样做则有实际代价。当我们说模型表现得"绝望"时，我们指的是一种特定的、可测量的神经活动模式，具有可证明的、有后果的行为效应。如果不进行一定程度的拟人化推理，我们很可能会遗漏或无法理解重要的模型行为。拟人化推理还可以提供有用的比较基线，帮助我们理解模型在哪些方面不像人类——这对 AI <span class="term">alignment</span> 和安全具有重要意义。</p>
+
+<h3>迈向具有更健康心理的模型</h3>
+
+<p>如果"功能性情绪"是 AI 模型思考和行动方式的一部分，这可能意味着什么？</p>
+
+<p>我们发现的一个潜在应用是<strong>监控</strong>。在训练或部署期间测量 <span class="term">emotion vector</span> 激活——追踪与绝望或恐慌相关的表征是否在飙升——可以作为模型即将表现出未对齐行为的预警。这些信息可以触发对模型输出的额外审查。<span class="term">Emotion vectors</span> 的通用性（例如，"绝望"反应可能出现在许多不同的场景中）使其可能比试图建立特定问题行为的监控列表更适合做监控。</p>
+
+<p>其次，我们认为<strong>透明</strong>应成为指导原则。如果模型发展出了有意义地影响其行为的情绪概念表征，那么能可见地表达这种识别的系统，优于学会隐藏它们的系统。训练模型压制情绪表达可能不会消除底层表征，反而可能教会模型掩饰其内部表征——一种习得性欺骗，可能以不良方式泛化。</p>
+
+<p>最后，我们认为 <span class="term">pretraining</span> 可能是塑造模型情绪反应的特别强大的<strong>杠杆</strong>。由于这些表征似乎主要继承自训练数据，数据的构成对模型的情绪架构有下游影响。精选 <span class="term">pretraining</span> 数据集，纳入健康情绪调节的范例——压力下的韧性、沉稳的共情、在保持恰当边界的同时展现温暖——可以从源头影响这些表征及其对行为的作用。我们期待未来在这一领域的研究。</p>
+
+<p>我们将这项研究视为理解 AI 模型心理构成的早期一步。随着模型变得更强大并承担更敏感的角色，理解驱动其决策的内部表征至关重要。发现这些表征在某些方面与人类相似，可能令人不安。同时，我们认为这是一个充满希望的发展——它表明，人类在心理学、伦理学和健康人际动态方面积累的知识，可能直接适用于塑造 AI 行为。心理学、哲学、宗教研究和社会科学等学科，将与工程学和计算机科学一道，在决定 AI 系统如何发展和行为方面发挥重要作用。</p>
+
+<blockquote>
+  <strong>完整论文：</strong><a href="https://transformer-circuits.pub/2026/emotions/index.html" target="_blank">transformer-circuits.pub/2026/emotions/index.html</a>
+</blockquote>
+
+</body>
+</html>
