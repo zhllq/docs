@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding Referrer Policy: strict-origin-when-cross-origin</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #64748b;
+            --success: #16a34a;
+            --warning: #ea580c;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            padding: 2rem;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        h2 {
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary);
+        }
+        h3 {
+            font-size: 1.2rem;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--secondary);
+        }
+        p { margin-bottom: 1rem; }
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .card-title {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .icon { font-size: 1.2rem; }
+        code {
+            background: #f1f5f9;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            color: #c026d3;
+        }
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+        .highlight { color: #38bdf8; }
+        .comment { color: #64748b; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border: 1px solid var(--border);
+        }
+        th {
+            background: var(--primary);
+            color: white;
+        }
+        tr:nth-child(even) { background: #f8fafc; }
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .badge-success { background: #dcfce7; color: var(--success); }
+        .badge-warning { background: #ffedd5; color: var(--warning); }
+        .badge-danger { background: #fee2e2; color: var(--danger); }
+        .badge-info { background: #dbeafe; color: var(--primary); }
+        .example-box {
+            background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .flow {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin: 0.5rem 0;
+        }
+        .flow-item {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        .flow-arrow { color: var(--primary); font-weight: bold; }
+        .flow-result {
+            background: #fef3c7;
+            border-color: #fbbf24;
+        }
+        .diagram {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            text-align: center;
+        }
+        .url-breakdown {
+            font-family: monospace;
+            font-size: 1rem;
+            margin: 1rem 0;
+        }
+        .url-part {
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            margin: 0 2px;
+        }
+        .url-scheme { background: #dbeafe; color: #1d4ed8; }
+        .url-host { background: #dcfce7; color: #166534; }
+        .url-port { background: #fef3c7; color: #92400e; }
+        .url-path { background: #f3e8ff; color: #7c3aed; }
+        .url-query { background: #ffe4e6; color: #be123c; }
+        ul, ol { margin: 1rem 0 1rem 1.5rem; }
+        li { margin-bottom: 0.5rem; }
+        .toc {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .toc-title { font-weight: 600; margin-bottom: 0.75rem; }
+        .toc a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        .toc a:hover { text-decoration: underline; }
+        .comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Understanding Referrer Policy</h1>
+        <p class="subtitle">A deep dive into <code>strict-origin-when-cross-origin</code> and related web security concepts</p>
+
+        <nav class="toc">
+            <div class="toc-title">📑 Table of Contents</div>
+            <ol>
+                <li><a href="#fundamentals">Fundamental Concepts</a></li>
+                <li><a href="#referer">The Referer Header</a></li>
+                <li><a href="#origin">Understanding Origin</a></li>
+                <li><a href="#cross-origin">Same-Origin vs Cross-Origin</a></li>
+                <li><a href="#referrer-policy">Referrer Policy Overview</a></li>
+                <li><a href="#strict-origin">strict-origin-when-cross-origin Explained</a></li>
+                <li><a href="#examples">Practical Examples</a></li>
+                <li><a href="#implementation">How to Implement</a></li>
+            </ol>
+        </nav>
+
+        <!-- Section 1: Fundamentals -->
+        <h2 id="fundamentals">1. Fundamental Concepts</h2>
+        
+        <div class="card">
+            <div class="card-title"><span class="icon">🌐</span> URL Structure</div>
+            <p>Before diving into referrer policies, let's understand URL components:</p>
+            <div class="url-breakdown">
+                <span class="url-part url-scheme">https://</span><span class="url-part url-host">www.example.com</span><span class="url-part url-port">:443</span><span class="url-part url-path">/products/item</span><span class="url-part url-query">?id=123&ref=home</span>
+            </div>
+            <ul>
+                <li><span class="badge badge-info">Scheme</span> Protocol used (http, https)</li>
+                <li><span class="badge badge-success">Host</span> Domain name or IP address</li>
+                <li><span class="badge badge-warning">Port</span> Network port (often implicit: 80 for HTTP, 443 for HTTPS)</li>
+                <li><span class="badge badge-info">Path</span> Resource location on the server</li>
+                <li><span class="badge badge-danger">Query</span> Additional parameters (may contain sensitive data!)</li>
+            </ul>
+        </div>
+
+        <!-- Section 2: Referer Header -->
+        <h2 id="referer">2. The Referer Header</h2>
+        
+        <div class="card">
+            <div class="card-title"><span class="icon">📤</span> What is the Referer Header?</div>
+            <p>The <code>Referer</code> (note: historically misspelled) is an HTTP header that browsers automatically send with requests. It tells the destination server <strong>where the user came from</strong>.</p>
+            
+            <div class="example-box">
+                <strong>Example Scenario:</strong><br>
+                You're on <code>https://blog.example.com/article/secret-tips</code> and click a link to <code>https://analytics.com</code>.
+                <br><br>
+                The browser sends this header to analytics.com:
+                <pre><code>Referer: https://blog.example.com/article/secret-tips</code></pre>
+            </div>
+        </div>
+
+        <h3>Why Referer Matters</h3>
+        <div class="comparison">
+            <div class="card">
+                <div class="card-title" style="color: var(--success)">✅ Useful For</div>
+                <ul>
+                    <li>Analytics (traffic sources)</li>
+                    <li>CSRF protection</li>
+                    <li>Access control decisions</li>
+                    <li>Debugging broken links</li>
+                </ul>
+            </div>
+            <div class="card">
+                <div class="card-title" style="color: var(--danger)">⚠️ Privacy Risks</div>
+                <ul>
+                    <li>Leaks sensitive URL paths</li>
+                    <li>Exposes query parameters (tokens, IDs)</li>
+                    <li>Reveals browsing patterns</li>
+                    <li>Can leak internal URLs</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 3: Origin -->
+        <h2 id="origin">3. Understanding Origin</h2>
+        
+        <div class="card">
+            <div class="card-title"><span class="icon">🎯</span> What is an Origin?</div>
+            <p>An <strong>origin</strong> is defined by three components:</p>
+            <table>
+                <tr>
+                    <th>Component</th>
+                    <th>Example</th>
+                </tr>
+                <tr>
+                    <td>Scheme (Protocol)</td>
+                    <td><code>https</code></td>
+                </tr>
+                <tr>
+                    <td>Host (Domain)</td>
+                    <td><code>www.example.com</code></td>
+                </tr>
+                <tr>
+                    <td>Port</td>
+                    <td><code>443</code> (default for HTTPS)</td>
+                </tr>
+            </table>
+            <p style="margin-top: 1rem;"><strong>Origin = Scheme + Host + Port</strong></p>
+            <p>Example: <code>https://www.example.com:443</code> → Origin is <code>https://www.example.com</code></p>
+        </div>
+
+        <h3>Origin Examples</h3>
+        <div class="card">
+            <table>
+                <tr>
+                    <th>Full URL</th>
+                    <th>Origin</th>
+                </tr>
+                <tr>
+                    <td><code>https://example.com/page?q=test</code></td>
+                    <td><code>https://example.com</code></td>
+                </tr>
+                <tr>
+                    <td><code>http://api.example.com:8080/data</code></td>
+                    <td><code>http://api.example.com:8080</code></td>
+                </tr>
+                <tr>
+                    <td><code>https://shop.example.com/cart</code></td>
+                    <td><code>https://shop.example.com</code></td>
+                </tr>
+            </table>
+            <p style="margin-top: 1rem;"><em>Note: Path and query string are NOT part of the origin!</em></p>
+        </div>
+
+        <!-- Section 4: Cross-Origin -->
+        <h2 id="cross-origin">4. Same-Origin vs Cross-Origin</h2>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🔄</span> Same-Origin</div>
+            <p>Two URLs are <strong>same-origin</strong> if they have the <em>same scheme, host, AND port</em>.</p>
+            
+            <div class="example-box">
+                <strong>Base URL:</strong> <code>https://example.com/page1</code>
+                <br><br>
+                <table>
+                    <tr>
+                        <th>Target URL</th>
+                        <th>Same Origin?</th>
+                        <th>Reason</th>
+                    </tr>
+                    <tr>
+                        <td><code>https://example.com/page2</code></td>
+                        <td><span class="badge badge-success">✓ Yes</span></td>
+                        <td>Same scheme, host, port</td>
+                    </tr>
+                    <tr>
+                        <td><code>https://example.com/dir/page</code></td>
+                        <td><span class="badge badge-success">✓ Yes</span></td>
+                        <td>Path doesn't matter</td>
+                    </tr>
+                    <tr>
+                        <td><code>http://example.com/page</code></td>
+                        <td><span class="badge badge-danger">✗ No</span></td>
+                        <td>Different scheme (http vs https)</td>
+                    </tr>
+                    <tr>
+                        <td><code>https://api.example.com/page</code></td>
+                        <td><span class="badge badge-danger">✗ No</span></td>
+                        <td>Different host (subdomain)</td>
+                    </tr>
+                    <tr>
+                        <td><code>https://example.com:8443/page</code></td>
+                        <td><span class="badge badge-danger">✗ No</span></td>
+                        <td>Different port</td>
+                    </tr>
+                    <tr>
+                        <td><code>https://other.com/page</code></td>
+                        <td><span class="badge badge-danger">✗ No</span></td>
+                        <td>Different host</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🌍</span> Cross-Origin</div>
+            <p>Any request to a <strong>different origin</strong> is considered cross-origin. This triggers various browser security mechanisms:</p>
+            <ul>
+                <li><strong>CORS</strong> (Cross-Origin Resource Sharing) - controls API access</li>
+                <li><strong>Referrer Policy</strong> - controls what URL info is sent</li>
+                <li><strong>Cookie restrictions</strong> - SameSite attribute</li>
+            </ul>
+        </div>
+
+        <!-- Section 5: Referrer Policy -->
+        <h2 id="referrer-policy">5. Referrer Policy Overview</h2>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">📋</span> Available Policies</div>
+            <table>
+                <tr>
+                    <th>Policy</th>
+                    <th>Behavior</th>
+                </tr>
+                <tr>
+                    <td><code>no-referrer</code></td>
+                    <td>Never send Referer header</td>
+                </tr>
+                <tr>
+                    <td><code>no-referrer-when-downgrade</code></td>
+                    <td>Send full URL, but nothing on HTTPS→HTTP</td>
+                </tr>
+                <tr>
+                    <td><code>origin</code></td>
+                    <td>Always send origin only (no path)</td>
+                </tr>
+                <tr>
+                    <td><code>origin-when-cross-origin</code></td>
+                    <td>Full URL for same-origin, origin only for cross-origin</td>
+                </tr>
+                <tr>
+                    <td><code>same-origin</code></td>
+                    <td>Full URL for same-origin, nothing for cross-origin</td>
+                </tr>
+                <tr>
+                    <td><code>strict-origin</code></td>
+                    <td>Origin only, nothing on downgrade</td>
+                </tr>
+                <tr>
+                    <td style="background: #dbeafe;"><code>strict-origin-when-cross-origin</code></td>
+                    <td style="background: #dbeafe;"><strong>Default policy</strong> (see below)</td>
+                </tr>
+                <tr>
+                    <td><code>unsafe-url</code></td>
+                    <td>Always send full URL (not recommended)</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Section 6: strict-origin-when-cross-origin -->
+        <h2 id="strict-origin">6. strict-origin-when-cross-origin Explained</h2>
+
+        <div class="card" style="border: 2px solid var(--primary);">
+            <div class="card-title"><span class="icon">⭐</span> The Default Browser Policy</div>
+            <p>This is the <strong>default referrer policy</strong> in modern browsers (Chrome 85+, Firefox 87+, Safari 14+). It provides a good balance between functionality and privacy.</p>
+        </div>
+
+        <h3>The Three Rules</h3>
+
+        <div class="card">
+            <div class="card-title" style="color: var(--success);">1️⃣ Same-Origin Requests</div>
+            <p><strong>Send the full URL</strong> (including path and query string)</p>
+            <div class="flow">
+                <div class="flow-item">https://example.com<span style="color: var(--primary);">/secret/page?token=abc</span></div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">https://example.com/other</div>
+                <span class="flow-arrow">=</span>
+                <div class="flow-item flow-result">Referer: https://example.com/secret/page?token=abc</div>
+            </div>
+            <p><em>Rationale: Same site, same trust level. Full analytics data is useful.</em></p>
+        </div>
+
+        <div class="card">
+            <div class="card-title" style="color: var(--warning);">2️⃣ Cross-Origin (Same Security Level)</div>
+            <p><strong>Send origin only</strong> (scheme + host, no path or query)</p>
+            <div class="flow">
+                <div class="flow-item">https://example.com<span style="color: var(--danger);">/secret/page?token=abc</span></div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">https://analytics.com/track</div>
+                <span class="flow-arrow">=</span>
+                <div class="flow-item flow-result">Referer: https://example.com</div>
+            </div>
+            <p><em>Rationale: Third party only needs to know where traffic came from, not specific pages.</em></p>
+        </div>
+
+        <div class="card">
+            <div class="card-title" style="color: var(--danger);">3️⃣ Security Downgrade (HTTPS → HTTP)</div>
+            <p><strong>Send nothing</strong> (empty Referer header)</p>
+            <div class="flow">
+                <div class="flow-item">https://example.com/page</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">http://insecure.com/</div>
+                <span class="flow-arrow">=</span>
+                <div class="flow-item flow-result">Referer: (empty)</div>
+            </div>
+            <p><em>Rationale: Never leak HTTPS URLs to insecure HTTP destinations!</em></p>
+        </div>
+
+        <!-- Section 7: Examples -->
+        <h2 id="examples">7. Practical Examples</h2>
+
+        <h3>Example A: Internal Navigation (Same-Origin)</h3>
+        <div class="example-box">
+            <p><strong>Scenario:</strong> User navigates within the same website</p>
+            <div class="flow">
+                <div class="flow-item">https://shop.example.com/cart?items=3</div>
+                <span class="flow-arrow">→ clicks link →</span>
+                <div class="flow-item">https://shop.example.com/checkout</div>
+            </div>
+            <p><strong>Referer sent:</strong> <code>https://shop.example.com/cart?items=3</code></p>
+            <p><strong>Result:</strong> <span class="badge badge-success">Full URL sent</span> - The checkout page can see exactly where the user came from.</p>
+        </div>
+
+        <h3>Example B: External Link (Cross-Origin, HTTPS→HTTPS)</h3>
+        <div class="example-box">
+            <p><strong>Scenario:</strong> User clicks an external link to a different website</p>
+            <div class="flow">
+                <div class="flow-item">https://blog.example.com/post/my-secret-draft?preview=true</div>
+                <span class="flow-arrow">→ clicks link →</span>
+                <div class="flow-item">https://twitter.com/share</div>
+            </div>
+            <p><strong>Referer sent:</strong> <code>https://blog.example.com</code></p>
+            <p><strong>Result:</strong> <span class="badge badge-warning">Origin only</span> - Twitter knows traffic came from blog.example.com but NOT the specific draft URL or preview token.</p>
+        </div>
+
+        <h3>Example C: Loading External Resources</h3>
+        <div class="example-box">
+            <p><strong>Scenario:</strong> Page loads an image from a CDN</p>
+            <pre><code><span class="comment">&lt;!-- On page: https://app.example.com/dashboard/user/12345 --&gt;</span>
+&lt;img src="<span class="highlight">https://cdn.images.com/logo.png</span>"&gt;</code></pre>
+            <p><strong>Referer sent:</strong> <code>https://app.example.com</code></p>
+            <p><strong>Result:</strong> <span class="badge badge-warning">Origin only</span> - CDN doesn't see user ID in the URL path.</p>
+        </div>
+
+        <h3>Example D: Security Downgrade</h3>
+        <div class="example-box">
+            <p><strong>Scenario:</strong> HTTPS page links to HTTP resource (bad practice!)</p>
+            <div class="flow">
+                <div class="flow-item">https://secure-bank.com/account/transfer</div>
+                <span class="flow-arrow">→ loads image →</span>
+                <div class="flow-item">http://old-tracker.com/pixel.gif</div>
+            </div>
+            <p><strong>Referer sent:</strong> <em>(nothing)</em></p>
+            <p><strong>Result:</strong> <span class="badge badge-danger">Empty</span> - Protects against leaking secure URLs over insecure connections.</p>
+        </div>
+
+        <h3>Example E: API Fetch Request</h3>
+        <div class="example-box">
+            <p><strong>Scenario:</strong> JavaScript makes an API call</p>
+            <pre><code><span class="comment">// On page: https://app.example.com/users/settings?tab=security</span>
+
+fetch('<span class="highlight">https://api.example.com/user/profile</span>')
+  .then(response => response.json());</code></pre>
+            <p><strong>Referer sent:</strong> <code>https://app.example.com</code></p>
+            <p><strong>Why?</strong> <code>app.example.com</code> ≠ <code>api.example.com</code> (different subdomain = different origin = cross-origin request)</p>
+        </div>
+
+        <h3>Example F: Subdomain Navigation</h3>
+        <div class="example-box">
+            <p><strong>Scenario:</strong> User moves from main site to documentation subdomain</p>
+            <div class="flow">
+                <div class="flow-item">https://www.example.com/pricing?plan=pro</div>
+                <span class="flow-arrow">→ clicks →</span>
+                <div class="flow-item">https://docs.example.com/getting-started</div>
+            </div>
+            <p><strong>Referer sent:</strong> <code>https://www.example.com</code></p>
+            <p><strong>Result:</strong> <span class="badge badge-warning">Origin only</span> - Subdomains are different origins!</p>
+        </div>
+
+        <!-- Section 8: Implementation -->
+        <h2 id="implementation">8. How to Implement</h2>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🔧</span> Setting Referrer Policy</div>
+            
+            <h3>Method 1: HTTP Header (Recommended)</h3>
+            <pre><code>Referrer-Policy: strict-origin-when-cross-origin</code></pre>
+
+            <h3>Method 2: HTML Meta Tag</h3>
+            <pre><code>&lt;meta name="referrer" content="strict-origin-when-cross-origin"&gt;</code></pre>
+
+            <h3>Method 3: Per-Element Attribute</h3>
+            <pre><code>&lt;a href="https://example.com" <span class="highlight">referrerpolicy="no-referrer"</span>&gt;Link&lt;/a&gt;
+
+&lt;img src="image.jpg" <span class="highlight">referrerpolicy="origin"</span>&gt;</code></pre>
+
+            <h3>Method 4: Fetch API</h3>
+            <pre><code>fetch('https://api.example.com/data', {
+  <span class="highlight">referrerPolicy: 'strict-origin-when-cross-origin'</span>
+});</code></pre>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">💡</span> Best Practices</div>
+            <ul>
+                <li>Use <code>strict-origin-when-cross-origin</code> as your default (it already is in modern browsers)</li>
+                <li>Use <code>no-referrer</code> for highly sensitive pages (password reset, etc.)</li>
+                <li>Never use <code>unsafe-url</code> unless absolutely necessary</li>
+                <li>Don't put sensitive data in URLs (tokens, session IDs, etc.)</li>
+                <li>Always use HTTPS to prevent unintentional referrer stripping</li>
+            </ul>
+        </div>
+
+        <div class="card" style="background: linear-gradient(135deg, #eff6ff 0%, #fdf4ff 100%);">
+            <div class="card-title"><span class="icon">📝</span> Summary</div>
+            <p><code>strict-origin-when-cross-origin</code> is the modern default that:</p>
+            <ul>
+                <li>✅ Preserves full referrer information within your own site (useful for analytics)</li>
+                <li>✅ Protects user privacy by sending only the origin to third parties</li>
+                <li>✅ Prevents any data leakage when downgrading from HTTPS to HTTP</li>
+            </ul>
+            <p style="margin-top: 1rem;"><strong>It's the "Goldilocks" policy—not too strict, not too permissive, just right for most use cases.</strong></p>
+        </div>
+
+        <footer style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text-muted); text-align: center;">
+            <p>Reference: <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy" target="_blank">MDN Web Docs - Referrer-Policy</a></p>
+        </footer>
+    </div>
+</body>
+</html>
