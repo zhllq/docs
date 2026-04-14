@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 最佳实践</title>
+<style>
+body {
+  font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  line-height: 1.85;
+  color: #1a1a1a;
+  background: #fff;
+}
+h1, h2, h3 { color: #1a56db; margin-top: 2rem; }
+h1 { font-size: 1.8rem; border-bottom: 2px solid #1a56db; padding-bottom: 0.5rem; }
+.subtitle { color: #666; font-size: 1rem; font-weight: normal; margin-top: 0.25rem; }
+.source-link { color: #666; font-size: 0.9rem; margin-bottom: 2rem; display: block; }
+.term { color: #1a56db; font-weight: bold; font-style: italic; }
+.translator-note { color: #b45309; font-size: 0.9em; font-style: italic; }
+pre { background: #f5f5f5; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.9rem; }
+code { font-family: Consolas, "Courier New", monospace; }
+p code, li code, td code { background: #f0f0f0; padding: 0.15em 0.35em; border-radius: 3px; font-size: 0.92em; }
+blockquote { border-left: 4px solid #1a56db; margin: 1rem 0; padding: 0.5rem 1rem; color: #555; background: #f8f9fa; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th { background: #1a56db; color: #fff; padding: 0.6rem 1rem; text-align: left; }
+td { padding: 0.6rem 1rem; border-bottom: 1px solid #e5e7eb; }
+tr:nth-child(even) { background: #f8f9fa; }
+img { max-width: 100%; height: auto; }
+.tip { background: #eef6ff; border-left: 4px solid #1a56db; padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 0 6px 6px 0; }
+.tip::before { content: "Tip: "; font-weight: bold; color: #1a56db; }
+.warning { background: #fff8e1; border-left: 4px solid #f59e0b; padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 0 6px 6px 0; }
+.warning::before { content: "Warning: "; font-weight: bold; color: #f59e0b; }
+.callout { background: #f3f4f6; border-left: 4px solid #6b7280; padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 0 6px 6px 0; }
+.step { background: #fafafa; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem 1.2rem; margin: 0.8rem 0; }
+.step-title { font-weight: bold; color: #1a56db; margin-bottom: 0.5rem; }
+hr { border: none; border-top: 1px solid #e5e7eb; margin: 2rem 0; }
+</style>
+</head>
+<body>
+
+<h1>Claude Code 最佳实践
+<div class="subtitle">Best Practices for Claude Code</div>
+</h1>
+
+<a class="source-link" href="https://code.claude.com/docs/en/best-practices" target="_blank">原文链接: https://code.claude.com/docs/en/best-practices</a>
+
+<blockquote>从环境配置到多会话并行，本文汇总了高效使用 <span class="term">Claude Code</span> 的技巧与模式。</blockquote>
+
+<p><span class="term">Claude Code</span> 是一个<span class="term">agent</span> 编程环境。它不是等你提问的聊天机器人——它能读文件、跑命令、改代码，你可以在旁边看，随时纠偏，也可以直接走开让它自主完成。</p>
+
+<p>这改变了你的工作方式。你不再自己写代码然后让 Claude 审查，而是描述你想要什么，Claude 来探索、规划、实现。</p>
+
+<p>但自主性也有学习曲线。Claude 在特定约束下工作，你需要理解这些约束。</p>
+
+<p>本指南涵盖了 Anthropic 内部团队和外部工程师在各种代码库、语言、环境中验证过的有效模式。关于<span class="term">agent</span> 循环的底层原理，参见 <a href="https://code.claude.com/docs/en/how-claude-code-works">How Claude Code works</a>。</p>
+
+<hr>
+
+<p>多数最佳实践都基于一个约束：<strong>Claude 的 <span class="term">context window</span> 填充速度很快，填满后性能下降。</strong></p>
+
+<p><span class="term">Context window</span> 装载你的整个对话：每条消息、Claude 读的每个文件、每条命令输出。一次调试或代码探索就可能消耗数万 <span class="term">token</span>。</p>
+
+<p>这很重要——<span class="term">LLM</span> 在 <span class="term">context</span> 填满时性能下降。<span class="term">Context window</span> 快满时，Claude 可能「遗忘」早期指令或犯更多错。<strong><span class="term">Context window</span> 是你需要管理的最重要资源。</strong>要了解会话中 <span class="term">context</span> 的实际填充情况，参见<a href="https://code.claude.com/docs/en/context-window">交互式演示</a>。可用<a href="https://code.claude.com/docs/en/statusline">自定义状态栏</a>持续跟踪 <span class="term">context</span> 用量，也可参考<a href="https://code.claude.com/docs/en/costs#reduce-token-usage">减少 token 用量</a>的策略。</p>
+
+<hr>
+
+<h2>让 Claude 有办法验证自己的工作</h2>
+
+<div class="tip">提供测试、截图或预期输出，让 Claude 能自我检查。这是你能做的<strong>最高杠杆</strong>的事。</div>
+
+<p>Claude 在能自行验证时表现显著提升——跑测试、比对截图、校验输出。</p>
+
+<p>没有明确的成功标准，它可能产出看起来正确但实际不工作的东西。你成了唯一的反馈回路，每个错误都需要你的注意力。</p>
+
+<table>
+<tr><th>策略</th><th>改进前</th><th>改进后</th></tr>
+<tr>
+  <td><strong>提供验证标准</strong></td>
+  <td><em>"实现一个验证邮箱的函数"</em></td>
+  <td><em>"写一个 validateEmail 函数。测试用例：user@example.com 返回 true，invalid 返回 false，user@.com 返回 false。实现后跑测试。"</em></td>
+</tr>
+<tr>
+  <td><strong>视觉验证 UI 变更</strong></td>
+  <td><em>"把仪表盘做得好看点"</em></td>
+  <td><em>"[粘贴截图] 实现这个设计。截图比对结果与原图，列出差异并修复。"</em></td>
+</tr>
+<tr>
+  <td><strong>定位根因而非症状</strong></td>
+  <td><em>"构建失败了"</em></td>
+  <td><em>"构建失败，错误信息：[粘贴错误]。修复它并验证构建成功。解决根因，不要压制错误。"</em></td>
+</tr>
+</table>
+
+<p>UI 变更可通过 <a href="https://code.claude.com/docs/en/chrome">Claude in Chrome 扩展</a>验证——它在浏览器中打开新标签页，测试 UI 并迭代到代码正常运行。</p>
+
+<p>验证手段也可以是测试套件、<span class="term">linter</span>、或检查输出的 <span class="term">Bash</span> 命令。在验证手段上多投入。</p>
+
+<hr>
+
+<h2>先探索，再规划，最后写代码</h2>
+
+<div class="tip">把调研和规划从实现中分离出来，避免解决错误的问题。</div>
+
+<p>让 Claude 直接动手写代码，可能写出解决错误问题的代码。用 <span class="term">Plan Mode</span> 将探索与执行分开。</p>
+
+<p>推荐的工作流分四个阶段：</p>
+
+<div class="step">
+<div class="step-title">1. 探索</div>
+<p>进入 <span class="term">Plan Mode</span>。Claude 读文件、回答问题，但不做任何修改。</p>
+<pre><code>read /src/auth and understand how we handle sessions and login.
+also look at how we manage environment variables for secrets.</code></pre>
+</div>
+
+<div class="step">
+<div class="step-title">2. 规划</div>
+<p>让 Claude 创建详细实现方案。</p>
+<pre><code>I want to add Google OAuth. What files need to change?
+What's the session flow? Create a plan.</code></pre>
+<p>按 <code>Ctrl+G</code> 可在编辑器中打开方案直接编辑，然后再让 Claude 执行。</p>
+</div>
+
+<div class="step">
+<div class="step-title">3. 实现</div>
+<p>切回 <span class="term">Normal Mode</span>，让 Claude 按方案编码并验证。</p>
+<pre><code>implement the OAuth flow from your plan. write tests for the
+callback handler, run the test suite and fix any failures.</code></pre>
+</div>
+
+<div class="step">
+<div class="step-title">4. 提交</div>
+<p>让 Claude 用描述性消息提交并创建 <span class="term">PR</span>。</p>
+<pre><code>commit with a descriptive message and open a PR</code></pre>
+</div>
+
+<div class="callout">
+<p><span class="term">Plan Mode</span> 有用，但也有开销。</p>
+<p>对于范围明确、改动很小的任务（修 typo、加一行日志、重命名变量），直接让 Claude 做即可。</p>
+<p>规划在以下情况最有价值：不确定方案、变更涉及多个文件、或对要改的代码不熟悉。如果你能一句话描述 diff，跳过规划。</p>
+</div>
+
+<hr>
+
+<h2>在 <span class="term">prompt</span> 中提供具体上下文</h2>
+
+<div class="tip">指令越精确，你需要的修正越少。</div>
+
+<p>Claude 能推断意图，但读不了你的心。引用具体文件、提及约束、指向示例模式。</p>
+
+<table>
+<tr><th>策略</th><th>改进前</th><th>改进后</th></tr>
+<tr>
+  <td><strong>界定任务范围。</strong>指定文件、场景和测试偏好。</td>
+  <td><em>"给 foo.py 加测试"</em></td>
+  <td><em>"为 foo.py 写测试，覆盖用户已登出的边界场景。不要用 mock。"</em></td>
+</tr>
+<tr>
+  <td><strong>指向信息源。</strong>引导 Claude 到能回答问题的源头。</td>
+  <td><em>"为什么 ExecutionFactory 的 API 这么怪？"</em></td>
+  <td><em>"查看 ExecutionFactory 的 git 历史，总结其 API 是如何演变至今的"</em></td>
+</tr>
+<tr>
+  <td><strong>引用已有模式。</strong>指向代码库中的现有模式。</td>
+  <td><em>"加一个日历组件"</em></td>
+  <td><em>"看一下首页现有 widget 的实现方式来理解模式。HotDogWidget.php 是个好例子。按相同模式实现一个新的日历 widget，支持选择月份和前后翻页选年。从零构建，不引入代码库中未使用的库。"</em></td>
+</tr>
+<tr>
+  <td><strong>描述症状。</strong>提供症状、可能位置、以及「修好」的定义。</td>
+  <td><em>"修复登录 bug"</em></td>
+  <td><em>"用户报告 session 超时后登录失败。检查 src/auth/ 中的认证流程，尤其是 token 刷新。写一个能复现问题的失败测试，然后修复。"</em></td>
+</tr>
+</table>
+
+<p>模糊 <span class="term">prompt</span> 在探索阶段也有价值——当你能承受纠偏成本时。像 <em>"你觉得这个文件有什么可以改进的？"</em> 这类提问可以发现你未曾想到的问题。</p>
+
+<h3>提供丰富内容</h3>
+
+<div class="tip">用 <code>@</code> 引用文件、粘贴截图/图片、或管道传入数据。</div>
+
+<p>你可以通过多种方式向 Claude 提供丰富数据：</p>
+
+<ul>
+<li><strong>用 <code>@</code> 引用文件</strong>，而非描述代码在哪。Claude 会在回复前读取文件。</li>
+<li><strong>直接粘贴图片。</strong>复制粘贴或拖拽图片到 <span class="term">prompt</span> 中。</li>
+<li><strong>给 URL。</strong>用于文档和 <span class="term">API</span> 参考。用 <code>/permissions</code> 将常用域名加入白名单。</li>
+<li><strong>管道传入数据。</strong>运行 <code>cat error.log | claude</code> 将文件内容直接发送。</li>
+<li><strong>让 Claude 自己获取所需内容。</strong>告诉 Claude 用 <span class="term">Bash</span> 命令、<span class="term">MCP</span> 工具或读文件来拉取上下文。</li>
+</ul>
+
+<hr>
+
+<h2>配置你的环境</h2>
+
+<p>几步配置即可让 <span class="term">Claude Code</span> 在所有会话中显著更高效。关于扩展功能的完整概览及使用时机，参见 <a href="https://code.claude.com/docs/en/features-overview">Extend Claude Code</a>。</p>
+
+<h3>写好 CLAUDE.md</h3>
+
+<div class="tip">运行 <code>/init</code> 基于当前项目结构生成初始 <span class="term">CLAUDE.md</span>，然后逐步完善。</div>
+
+<p><span class="term">CLAUDE.md</span> 是一个特殊文件，Claude 在每次对话开始时读取。在其中写入 <span class="term">Bash</span> 命令、代码风格和工作流规则。它为 Claude 提供无法从代码推断的持久上下文。</p>
+
+<p><code>/init</code> 命令会分析你的代码库，检测构建系统、测试框架和代码模式，为你提供可靠的起点。</p>
+
+<p>CLAUDE.md 没有固定格式，保持简短、可读即可。示例：</p>
+
+<pre><code># Code style
+- Use ES modules (import/export) syntax, not CommonJS (require)
+- Destructure imports when possible (eg. import { foo } from 'bar')
+
+# Workflow
+- Be sure to typecheck when you're done making a series of code changes
+- Prefer running single tests, and not the whole test suite, for performance</code></pre>
+
+<p><span class="term">CLAUDE.md</span> 每次会话都会加载，所以只放通用内容。特定领域知识或偶尔用到的工作流，用 <span class="term">skills</span> 代替——Claude 按需加载，不会撑大每次对话。</p>
+
+<p>保持精简。对每一行问：<em>「删掉这行会导致 Claude 犯错吗？」</em> 如果不会，删。臃肿的 <span class="term">CLAUDE.md</span> 会导致 Claude 忽略你的真正指令！</p>
+
+<table>
+<tr><th>应该包含</th><th>不应包含</th></tr>
+<tr><td>Claude 猜不到的 <span class="term">Bash</span> 命令</td><td>Claude 读代码就能推断的东西</td></tr>
+<tr><td>与默认不同的代码风格规则</td><td>Claude 已知的标准语言惯例</td></tr>
+<tr><td>测试说明和首选测试运行器</td><td>详细 <span class="term">API</span> 文档（链接过去即可）</td></tr>
+<tr><td>仓库规范（分支命名、<span class="term">PR</span> 惯例）</td><td>频繁变更的信息</td></tr>
+<tr><td>项目特定的架构决策</td><td>冗长的解释或教程</td></tr>
+<tr><td>开发环境怪癖（必需的环境变量）</td><td>逐文件描述代码库</td></tr>
+<tr><td>常见陷阱或非显而易见的行为</td><td>"写干净的代码"之类不言自明的做法</td></tr>
+</table>
+
+<p>如果 Claude 在有规则的情况下仍反复犯错，文件可能太长、规则被淹没了。如果 Claude 问了 CLAUDE.md 中已回答的问题，措辞可能有歧义。把 CLAUDE.md 当代码对待：出问题时审查它，定期修剪，通过观察 Claude 行为是否改变来测试修改效果。</p>
+
+<p>可以用强调语（如「IMPORTANT」或「YOU MUST」）提升规则的遵守度。将 CLAUDE.md 提交到 <span class="term">git</span>，让团队共同维护。此文件的价值随时间复利增长。</p>
+
+<p>CLAUDE.md 可以用 <code>@path/to/import</code> 语法导入其他文件：</p>
+
+<pre><code>See @README.md for project overview and @package.json for available npm commands.
+
+# Additional Instructions
+- Git workflow: @docs/git-instructions.md
+- Personal overrides: @~/.claude/my-project-instructions.md</code></pre>
+
+<p>CLAUDE.md 可放在多个位置：</p>
+
+<ul>
+<li><strong>主目录 (<code>~/.claude/CLAUDE.md</code>)</strong>：适用于所有 Claude 会话</li>
+<li><strong>项目根目录 (<code>./CLAUDE.md</code>)</strong>：提交到 <span class="term">git</span>，与团队共享</li>
+<li><strong>项目根目录 (<code>./CLAUDE.local.md</code>)</strong>：个人项目笔记；将此文件加入 <code>.gitignore</code></li>
+<li><strong>父目录</strong>：适用于 <span class="term">monorepo</span><span class="translator-note">（译者注：指单一仓库管理多个项目的代码组织方式）</span>，<code>root/CLAUDE.md</code> 和 <code>root/foo/CLAUDE.md</code> 均自动加载</li>
+<li><strong>子目录</strong>：Claude 处理该目录文件时按需加载子目录的 CLAUDE.md</li>
+</ul>
+
+<h3>配置权限</h3>
+
+<div class="tip">用 <span class="term">auto mode</span> 让分类器<span class="translator-note">（译者注：指自动审查命令安全性的独立模型）</span>处理审批，用 <code>/permissions</code> 将特定命令加白，或用 <code>/sandbox</code> 做 OS 级隔离。三者都能减少中断，同时保持控制。</div>
+
+<p>默认情况下，<span class="term">Claude Code</span> 对可能修改系统的操作（文件写入、<span class="term">Bash</span> 命令、<span class="term">MCP</span> 工具等）都请求权限。安全但烦人——批准了十次之后你其实已不在认真看了。三种方式减少中断：</p>
+
+<ul>
+<li><strong><span class="term">Auto mode</span></strong>：独立分类器模型审查命令，仅阻止看起来有风险的操作——权限升级、未知基础设施、恶意内容驱动的操作。适合你信任任务大方向但不想逐步点击批准的场景。</li>
+<li><strong>权限白名单</strong>：允许你已知安全的特定工具，如 <code>npm run lint</code> 或 <code>git commit</code>。</li>
+<li><strong>沙箱</strong>：启用 OS 级隔离，限制文件系统和网络访问，让 Claude 在限定边界内更自由地工作。</li>
+</ul>
+
+<p>详见 <a href="https://code.claude.com/docs/en/permission-modes">permission modes</a>、<a href="https://code.claude.com/docs/en/permissions">permission rules</a> 和 <a href="https://code.claude.com/docs/en/sandboxing">sandboxing</a>。</p>
+
+<h3>使用 CLI 工具</h3>
+
+<div class="tip">告诉 <span class="term">Claude Code</span> 在与外部服务交互时使用 <span class="term">CLI</span> 工具，如 <code>gh</code>、<code>aws</code>、<code>gcloud</code>、<code>sentry-cli</code>。</div>
+
+<p><span class="term">CLI</span> 工具是与外部服务交互时最节省 <span class="term">context</span> 的方式。用 GitHub 就装 <code>gh</code> CLI——Claude 会用它创建 issue、开 <span class="term">PR</span>、读评论。没有 <code>gh</code>，Claude 仍可用 GitHub <span class="term">API</span>，但未认证请求容易触发速率限制。</p>
+
+<p>Claude 也擅长学习它不认识的 <span class="term">CLI</span> 工具。试试：<em>「用 'foo-cli-tool --help' 了解 foo 工具，然后用它解决 A、B、C。」</em></p>
+
+<h3>连接 MCP 服务器</h3>
+
+<div class="tip">运行 <code>claude mcp add</code> 连接 Notion、Figma、数据库等外部工具。</div>
+
+<p>通过 <span class="term">MCP</span> 服务器<span class="translator-note">（译者注：Model Context Protocol，模型上下文协议，允许 Claude 与外部工具交互的协议）</span>，你可以让 Claude 从 issue 追踪器实现功能、查询数据库、分析监控数据、集成 Figma 设计、自动化工作流。</p>
+
+<h3>设置 hooks</h3>
+
+<div class="tip">用 <span class="term">hooks</span><span class="translator-note">（译者注：此处指 Claude Code 的钩子系统，在 Claude 工作流特定节点自动执行脚本，非 git hooks）</span> 处理必须零例外执行的操作。</div>
+
+<p><span class="term">Hooks</span> 在 Claude 工作流的特定节点自动运行脚本。与 CLAUDE.md 中的指令（建议性的）不同，<span class="term">hooks</span> 是确定性的，保证操作一定执行。</p>
+
+<p>Claude 可以帮你写 <span class="term">hooks</span>。试试：<em>「写一个 hook，每次编辑文件后运行 eslint」</em> 或 <em>「写一个 hook，阻止写入 migrations 文件夹」</em>。直接编辑 <code>.claude/settings.json</code> 手动配置 <span class="term">hooks</span>，或运行 <code>/hooks</code> 浏览已有配置。</p>
+
+<h3>创建 skills</h3>
+
+<div class="tip">在 <code>.claude/skills/</code> 中创建 <code>SKILL.md</code> 文件，为 Claude 提供领域知识和可复用工作流。</div>
+
+<p><span class="term">Skills</span><span class="translator-note">（译者注：指 Claude Code 的技能系统，通过 SKILL.md 文件定义的可复用知识和工作流）</span>用项目、团队或领域特定的信息扩展 Claude 的知识。Claude 在相关时自动应用，你也可以用 <code>/skill-name</code> 直接调用。</p>
+
+<p>在 <code>.claude/skills/</code> 下创建包含 <code>SKILL.md</code> 的目录即可：</p>
+
+<pre><code># .claude/skills/api-conventions/SKILL.md
+---
+name: api-conventions
+description: REST API design conventions for our services
+---
+# API Conventions
+- Use kebab-case for URL paths
+- Use camelCase for JSON properties
+- Always include pagination for list endpoints
+- Version APIs in the URL path (/v1/, /v2/)</code></pre>
+
+<p><span class="term">Skills</span> 也可以定义你直接调用的可重复工作流：</p>
+
+<pre><code># .claude/skills/fix-issue/SKILL.md
+---
+name: fix-issue
+description: Fix a GitHub issue
+disable-model-invocation: true
+---
+Analyze and fix the GitHub issue: $ARGUMENTS.
+
+1. Use `gh issue view` to get the issue details
+2. Understand the problem described in the issue
+3. Search the codebase for relevant files
+4. Implement the necessary changes to fix the issue
+5. Write and run tests to verify the fix
+6. Ensure code passes linting and type checking
+7. Create a descriptive commit message
+8. Push and create a PR</code></pre>
+
+<p>运行 <code>/fix-issue 1234</code> 即可调用。对有副作用的工作流使用 <code>disable-model-invocation: true</code>，确保只能手动触发。</p>
+
+<h3>创建自定义 subagent</h3>
+
+<div class="tip">在 <code>.claude/agents/</code> 中定义专门的助手，Claude 可将隔离任务委派给它们。</div>
+
+<p><span class="term">Subagent</span><span class="translator-note">（译者注：指 Claude Code 中运行在独立 context 中、拥有独立工具集的子代理）</span>在自己的 <span class="term">context</span> 中运行，有自己的工具集。适用于需要读取大量文件或需要专注处理而不应干扰主对话的任务。</p>
+
+<pre><code># .claude/agents/security-reviewer.md
+---
+name: security-reviewer
+description: Reviews code for security vulnerabilities
+tools: Read, Grep, Glob, Bash
+model: opus
+---
+You are a senior security engineer. Review code for:
+- Injection vulnerabilities (SQL, XSS, command injection)
+- Authentication and authorization flaws
+- Secrets or credentials in code
+- Insecure data handling
+
+Provide specific line references and suggested fixes.</code></pre>
+
+<p>显式告诉 Claude 使用 <span class="term">subagent</span>：<em>「用一个 subagent 审查这段代码的安全问题。」</em></p>
+
+<h3>安装插件</h3>
+
+<div class="tip">运行 <code>/plugin</code> 浏览市场。<span class="term">Plugin</span> 无需配置即可添加 <span class="term">skills</span>、工具和集成。</div>
+
+<p><span class="term">Plugin</span> 将 <span class="term">skills</span>、<span class="term">hooks</span>、<span class="term">subagent</span> 和 <span class="term">MCP</span> 服务器打包成一个可安装单元，来自社区和 Anthropic。如果你用的是强类型语言，安装<a href="https://code.claude.com/docs/en/discover-plugins#code-intelligence">代码智能插件</a>，为 Claude 提供精确的符号导航和编辑后自动错误检测。</p>
+
+<p>关于在 <span class="term">skills</span>、<span class="term">subagent</span>、<span class="term">hooks</span> 和 <span class="term">MCP</span> 间选择的指导，参见 <a href="https://code.claude.com/docs/en/features-overview#match-features-to-your-goal">Extend Claude Code</a>。</p>
+
+<hr>
+
+<h2>高效沟通</h2>
+
+<p>你与 <span class="term">Claude Code</span> 的沟通方式直接影响结果质量。</p>
+
+<h3>问代码库问题</h3>
+
+<div class="tip">像问高级工程师一样问 Claude。</div>
+
+<p>入职新代码库时，用 <span class="term">Claude Code</span> 学习和探索。你可以问 Claude 那些你会问另一个工程师的问题：</p>
+
+<ul>
+<li>日志系统是怎么工作的？</li>
+<li>如何新建一个 <span class="term">API endpoint</span>？</li>
+<li><code>foo.rs</code> 第 134 行的 <code>async move { ... }</code> 是什么意思？</li>
+<li><code>CustomerOnboardingFlowImpl</code> 处理了哪些边界情况？</li>
+<li>第 333 行为什么调用 <code>foo()</code> 而不是 <code>bar()</code>？</li>
+</ul>
+
+<p>这种方式可以有效缩短上手时间，减少对其他工程师的依赖。无需特殊 <span class="term">prompt</span> 技巧，直接提问。</p>
+
+<h3>让 Claude 采访你</h3>
+
+<div class="tip">对于较大的功能，先让 Claude 采访你。从一个简短 <span class="term">prompt</span> 开始，要求 Claude 用 <code>AskUserQuestion</code> 工具采访你。</div>
+
+<p>Claude 会问你可能没想到的问题——技术实现、UI/UX、边界情况、权衡取舍。</p>
+
+<pre><code>I want to build [brief description]. Interview me in detail using the AskUserQuestion tool.
+
+Ask about technical implementation, UI/UX, edge cases, concerns, and tradeoffs. Don't ask obvious questions, dig into the hard parts I might not have considered.
+
+Keep interviewing until we've covered everything, then write a complete spec to SPEC.md.</code></pre>
+
+<p>规格完成后，开一个新会话来执行。新会话有干净的 <span class="term">context</span>，专注于实现，而你有一份可参考的书面规格。</p>
+
+<hr>
+
+<h2>管理你的会话</h2>
+
+<p>对话是持久且可逆的。善用这一点！</p>
+
+<h3>尽早、频繁地纠偏</h3>
+
+<div class="tip">一旦发现 Claude 偏离方向，立即纠正。</div>
+
+<p>最好的结果来自紧密的反馈循环。虽然 Claude 偶尔首次就完美解决问题，但快速纠正通常能更快产出更好的方案。</p>
+
+<ul>
+<li><strong><code>Esc</code></strong>：按 <code>Esc</code> 键中途停止 Claude。<span class="term">Context</span> 保留，可以重新引导。</li>
+<li><strong><code>Esc + Esc</code> 或 <code>/rewind</code></strong>：双击 <code>Esc</code> 或运行 <code>/rewind</code> 打开回退菜单，恢复对话和代码状态，或从选定消息开始总结。</li>
+<li><strong><code>"Undo that"</code></strong>：让 Claude 撤销其更改。</li>
+<li><strong><code>/clear</code></strong>：在无关任务之间重置 <span class="term">context</span>。长会话中不相关的 <span class="term">context</span> 会降低性能。</li>
+</ul>
+
+<p>如果你在同一会话中对同一问题纠正了两次以上，<span class="term">context</span> 中已充满失败的尝试。运行 <code>/clear</code>，用更具体的 <span class="term">prompt</span>（融入你学到的东西）重新开始。干净的会话加上更好的 <span class="term">prompt</span>，几乎总是优于累积纠正的长会话。</p>
+
+<h3>积极管理 context</h3>
+
+<div class="tip">在无关任务之间运行 <code>/clear</code> 重置 <span class="term">context</span>。</div>
+
+<p><span class="term">Claude Code</span> 在接近 <span class="term">context</span> 上限时自动压缩<span class="translator-note">（译者注：指 auto compaction，自动摘要历史对话以释放 context window 空间）</span>对话历史，保留重要代码和决策，同时释放空间。</p>
+
+<p>长会话中，<span class="term">context window</span> 可能充满无关对话、文件内容和命令输出，降低性能甚至分散 Claude 注意力。</p>
+
+<ul>
+<li>任务之间频繁用 <code>/clear</code> 彻底重置 <span class="term">context window</span></li>
+<li>自动压缩触发时，Claude 总结最重要的内容——代码模式、文件状态、关键决策</li>
+<li>需要更多控制时，运行 <code>/compact &lt;instructions&gt;</code>，如 <code>/compact Focus on the API changes</code></li>
+<li>只压缩部分对话：用 <code>Esc + Esc</code> 或 <code>/rewind</code>，选择一个消息检查点，选 <strong>Summarize from here</strong>。从该点起的消息被浓缩，之前的 <span class="term">context</span> 保持不变。</li>
+<li>在 CLAUDE.md 中自定义压缩行为，如 <em>「压缩时，始终保留完整的已修改文件列表和测试命令」</em>，确保关键 <span class="term">context</span> 在总结后存活</li>
+<li>对不需要留在 <span class="term">context</span> 中的快速提问，用 <code>/btw</code>。答案出现在可关闭的浮层中，不进入对话历史，查细节而不增长 <span class="term">context</span>。</li>
+</ul>
+
+<h3>用 subagent 做调研</h3>
+
+<div class="tip">用 <em>「用 subagent 调研 X」</em> 委派研究任务。它们在独立 <span class="term">context</span> 中探索，保持你的主对话干净用于实现。</div>
+
+<p><span class="term">Context</span> 是你的根本约束，<span class="term">subagent</span> 因此是最强大的工具之一。Claude 调研代码库时会读大量文件，全部消耗你的 <span class="term">context</span>。<span class="term">Subagent</span> 在独立 <span class="term">context window</span> 中运行，只回传摘要：</p>
+
+<pre><code>Use subagents to investigate how our authentication system handles token
+refresh, and whether we have any existing OAuth utilities I should reuse.</code></pre>
+
+<p><span class="term">Subagent</span> 探索代码库、读相关文件、回传发现——全程不污染你的主对话。</p>
+
+<p>实现完成后也可以用 <span class="term">subagent</span> 做验证：</p>
+
+<pre><code>use a subagent to review this code for edge cases</code></pre>
+
+<h3>用检查点回退</h3>
+
+<div class="tip">Claude 的每个操作都会创建检查点<span class="translator-note">（译者注：指 Claude Code 内置的 checkpoint 功能，可回退对话和代码状态到任意先前节点）</span>。你可以将对话、代码或两者恢复到任意先前检查点。</div>
+
+<p>Claude 在做更改前自动创建检查点。双击 <code>Escape</code> 或运行 <code>/rewind</code> 打开回退菜单。你可以只恢复对话、只恢复代码、两者都恢复、或从选定消息开始总结。详见 <a href="https://code.claude.com/docs/en/checkpointing">Checkpointing</a>。</p>
+
+<p>不必谨小慎微地规划每一步。直接让 Claude 尝试有风险的方案——不行就回退，换一种方法。检查点跨会话持久化，关闭终端后仍可回退。</p>
+
+<div class="warning">检查点只跟踪 <em>Claude 做出的</em>更改，不跟踪外部进程。它不能替代 <span class="term">git</span>。</div>
+
+<h3>恢复对话</h3>
+
+<div class="tip">运行 <code>claude --continue</code> 接续上次对话，或 <code>--resume</code> 从近期会话中选择。</div>
+
+<p><span class="term">Claude Code</span> 在本地保存对话。任务跨越多个会话时，无需重新解释上下文：</p>
+
+<pre><code>claude --continue    # 恢复最近的对话
+claude --resume      # 从近期对话中选择</code></pre>
+
+<p>用 <code>/rename</code> 给会话起描述性名称，如 <code>"oauth-migration"</code> 或 <code>"debugging-memory-leak"</code>，便于日后查找。把会话当分支用：不同工作流可以有独立的持久 <span class="term">context</span>。</p>
+
+<hr>
+
+<h2>自动化与规模化</h2>
+
+<p>一旦你能高效使用一个 Claude，就用并行会话、非交互模式和扇出模式成倍放大产出。</p>
+
+<p>前文假设一人一 Claude 一对话。但 <span class="term">Claude Code</span> 支持水平扩展。本节展示如何做得更多。</p>
+
+<h3>运行非交互模式</h3>
+
+<div class="tip">在 <span class="term">CI</span>、pre-commit hook 或脚本中使用 <code>claude -p "prompt"</code>。加 <code>--output-format stream-json</code> 获取流式 <span class="term">JSON</span> 输出。</div>
+
+<p>用 <code>claude -p "your prompt"</code> 无需会话即可运行 Claude。非交互模式是将 Claude 集成到 <span class="term">CI</span> <span class="term">pipeline</span>、pre-commit hook 或任何自动化工作流的方式。输出格式支持编程解析：纯文本、<span class="term">JSON</span> 或流式 <span class="term">JSON</span>。</p>
+
+<pre><code># 一次性查询
+claude -p "Explain what this project does"
+
+# 结构化输出供脚本使用
+claude -p "List all API endpoints" --output-format json
+
+# 流式输出用于实时处理
+claude -p "Analyze this log file" --output-format stream-json</code></pre>
+
+<h3>运行多个 Claude 会话</h3>
+
+<div class="tip">并行运行多个 Claude 会话以加速开发、运行隔离实验或启动复杂工作流。</div>
+
+<p>三种主要方式运行并行会话：</p>
+
+<ul>
+<li><a href="https://code.claude.com/docs/en/desktop#work-in-parallel-with-sessions"><strong>Claude Code 桌面应用</strong></a>：可视化管理多个本地会话。每个会话有独立的 <span class="term">worktree</span><span class="translator-note">（译者注：指 git worktree，允许同一仓库同时签出多个工作目录）</span>。</li>
+<li><a href="https://code.claude.com/docs/en/claude-code-on-the-web"><strong>Claude Code Web 版</strong></a>：在 Anthropic 安全云基础设施上运行，使用隔离 VM。</li>
+<li><a href="https://code.claude.com/docs/en/agent-teams"><strong>Agent teams</strong></a>：多个会话的自动化协调，共享任务、消息传递和团队负责人。</li>
+</ul>
+
+<p>并行化之外，多会话还支持以质量为中心的工作流。全新 <span class="term">context</span> 提升代码审查质量——Claude 不会偏向它刚写的代码。</p>
+
+<p>例如，使用 Writer/Reviewer 模式：</p>
+
+<table>
+<tr><th>会话 A（Writer）</th><th>会话 B（Reviewer）</th></tr>
+<tr>
+  <td><code>Implement a rate limiter for our API endpoints</code></td>
+  <td></td>
+</tr>
+<tr>
+  <td></td>
+  <td><code>Review the rate limiter implementation in @src/middleware/rateLimiter.ts. Look for edge cases, race conditions, and consistency with our existing middleware patterns.</code></td>
+</tr>
+<tr>
+  <td><code>Here's the review feedback: [Session B output]. Address these issues.</code></td>
+  <td></td>
+</tr>
+</table>
+
+<p>类似的方式也适用于测试：一个 Claude 写测试，另一个写代码使测试通过。</p>
+
+<h3>跨文件扇出</h3>
+
+<div class="tip">循环调用 <code>claude -p</code> 处理每个任务。用 <code>--allowedTools</code> 限定批量操作的权限范围。</div>
+
+<p>大规模迁移或分析时，可将工作分发到多个并行 Claude 调用：</p>
+
+<div class="step">
+<div class="step-title">1. 生成任务列表</div>
+<p>让 Claude 列出所有需要迁移的文件（如 <em>「列出所有 2000 个需要迁移的 Python 文件」</em>）。</p>
+</div>
+
+<div class="step">
+<div class="step-title">2. 写脚本循环处理</div>
+<pre><code>for file in $(cat files.txt); do
+  claude -p "Migrate $file from React to Vue. Return OK or FAIL." \
+    --allowedTools "Edit,Bash(git commit *)"
+done</code></pre>
+</div>
+
+<div class="step">
+<div class="step-title">3. 先试几个文件，再全量运行</div>
+<p>根据前 2-3 个文件的情况调整 <span class="term">prompt</span>，然后全量运行。<code>--allowedTools</code> 限制 Claude 可做的操作——无人值守运行时这很重要。</p>
+</div>
+
+<p>也可将 Claude 集成到已有数据/处理 <span class="term">pipeline</span> 中：</p>
+
+<pre><code>claude -p "&lt;your prompt&gt;" --output-format json | your_command</code></pre>
+
+<p>开发阶段用 <code>--verbose</code> 调试，生产环境关闭。</p>
+
+<h3>用 auto mode 实现无人值守运行</h3>
+
+<p>需要不间断执行且有后台安全检查时，用 <span class="term">auto mode</span>。分类器模型在命令运行前审查，阻止权限升级、未知基础设施操作和恶意内容驱动的操作，同时让常规工作无需确认即可进行。</p>
+
+<pre><code>claude --permission-mode auto -p "fix all lint errors"</code></pre>
+
+<p>对使用 <code>-p</code> 标志的非交互运行，如果分类器反复阻止操作，<span class="term">auto mode</span> 会中止——因为没有用户可以兜底。详见 <a href="https://code.claude.com/docs/en/permission-modes#when-auto-mode-falls-back">when auto mode falls back</a>。</p>
+
+<hr>
+
+<h2>避免常见失败模式</h2>
+
+<p>以下是常见错误。尽早识别能节省大量时间：</p>
+
+<ul>
+<li><strong>大杂烩会话。</strong>你从一个任务开始，中途问了不相关的东西，又回到第一个任务。<span class="term">Context</span> 被无关信息填满。
+<blockquote><strong>解法</strong>：在无关任务之间用 <code>/clear</code>。</blockquote></li>
+
+<li><strong>反复纠正。</strong>Claude 做错了，你纠正，还是不对，再纠正。<span class="term">Context</span> 被失败方案污染。
+<blockquote><strong>解法</strong>：两次纠正失败后，<code>/clear</code>，用融入所学的更好 <span class="term">prompt</span> 重新开始。</blockquote></li>
+
+<li><strong>臃肿的 CLAUDE.md。</strong>文件太长，Claude 忽略其中一半——重要规则淹没在噪声里。
+<blockquote><strong>解法</strong>：狠心修剪。如果 Claude 在没有某条指令的情况下已做得正确，删掉它或转为 <span class="term">hook</span>。</blockquote></li>
+
+<li><strong>信任-验证缺口。</strong>Claude 产出看似合理但未处理边界情况的实现。
+<blockquote><strong>解法</strong>：始终提供验证手段（测试、脚本、截图）。如果你没法验证，就别上线。</blockquote></li>
+
+<li><strong>无限探索。</strong>你让 Claude「调研」某东西但没划定范围。Claude 读了几百个文件，<span class="term">context</span> 被塞满。
+<blockquote><strong>解法</strong>：缩小调研范围，或用 <span class="term">subagent</span>，让探索不消耗你的主 <span class="term">context</span>。</blockquote></li>
+</ul>
+
+<hr>
+
+<h2>培养你的直觉</h2>
+
+<p>本指南中的模式不是铁律。它们是通用的起点，未必适用于每种情况。</p>
+
+<p>有时你<em>应该</em>让 <span class="term">context</span> 累积——因为你深陷一个复杂问题，历史记录有价值。有时你应该跳过规划让 Claude 自己想办法——因为任务本身就是探索性的。有时模糊 <span class="term">prompt</span> 恰好合适——因为你想先看看 Claude 如何理解问题，再加以约束。</p>
+
+<p>留意什么有效。Claude 产出优秀结果时，注意你做了什么：<span class="term">prompt</span> 结构、提供的上下文、所处的模式。Claude 挣扎时，问为什么——<span class="term">context</span> 太嘈杂？<span class="term">Prompt</span> 太模糊？任务对单次处理来说太大？</p>
+
+<p>假以时日，你会培养出指南无法捕捉的直觉。你会知道何时具体、何时开放，何时规划、何时探索，何时清空 <span class="term">context</span>、何时让它累积。</p>
+
+<h2>相关资源</h2>
+
+<ul>
+<li><a href="https://code.claude.com/docs/en/how-claude-code-works">How Claude Code works</a>：<span class="term">agent</span> 循环、工具与 <span class="term">context</span> 管理</li>
+<li><a href="https://code.claude.com/docs/en/features-overview">Extend Claude Code</a>：<span class="term">skills</span>、<span class="term">hooks</span>、<span class="term">MCP</span>、<span class="term">subagent</span> 与 <span class="term">plugin</span></li>
+<li><a href="https://code.claude.com/docs/en/common-workflows">Common workflows</a>：调试、测试、<span class="term">PR</span> 等分步指南</li>
+<li><a href="https://code.claude.com/docs/en/memory">CLAUDE.md</a>：存储项目惯例与持久上下文</li>
+</ul>
+
+</body>
+</html>
